@@ -142,21 +142,21 @@ alert status --active
 - ✅ Git 版本控制已初始化
 - ✅ 安装核心运维技能套件（6个技能）
 - ✅ 启动 system-health-monitor 长监控任务
-- ✅ 配置 systemd timer 自动运行 ops-monitor tick（每5分钟）
-- ✅ 实现基础监控输出（stdout/journald）
+- ✅ 配置 ops-monitor tick 定时任务（每10分钟）
+- ✅ 实现飞书告警通知 (feishu-notify.py)
+- ✅ 添加网关健康检查 (gateway-health-check)
+- ✅ 实现心跳检查 (heartbeat-check)
 
 ### 进行中 🔄
-- 🔄 **配置 Feishu 通知集成** - 通过 openclaw message send 发送告警
 - 🔄 **配置 rhandus-alerting-system** - 高级告警规则和多通道通知
-- 🔄 **设置关键指标阈值告警** - 磁盘、内存、CPU、服务健康
-- 🔄 **配置日志轮转策略** - 管理 /tmp/health-monitor.log 和 alerts.log
+- 🔄 **设置关键指标阈值优化** - 磁盘、内存、CPU、服务健康
+- 🔄 **配置日志轮转策略** - 管理监控日志
 
 ### 待完成 ⏳
-- ⏳ 建立日志轮转和归档策略
-- ⏳ 配置自动备份工作区配置
 - ⏳ 创建 incident post-mortem 模板
 - ⏳ 设置 ops-dashboard 定期报告（日报/周报）
-- ⏳ 集成 Feishu/Telegram 通知渠道
+- ⏳ 优化告警过滤（减少误报）
+- ⏳ 添加更多服务健康检查（数据库、API等）
 
 ---
 
@@ -216,12 +216,19 @@ incidents/
 ## 🕐 定时任务配置
 
 ### ops-monitor tick (报告生成)
-**频率**: 每 30 分钟  
-**调度**: crontab `*/30 * * * * /usr/local/bin/ops-monitor-tick`  
+**频率**: 每 **10 分钟** (已调整)  
+**调度**: crontab `*/10 * * * * /usr/local/bin/ops-monitor-tick`  
 **日志**: `/var/log/ops-monitor-tick.log`  
 **状态**: ✅ 已配置并运行中
 
-**首次运行**: 2026-03-17 14:03
+**功能**:
+- 调用 ops-dashboard 获取系统状态
+- 运行 ops-monitor 检查所有任务 (heartbeat, gateway)
+- 检测异常并发送飞书告警
+- 记录完整历史到日志
+
+**首次运行**: 2026-03-17 14:03  
+**最新调整**: 2026-03-17 18:37 (间隔改为10分钟，添加网关检查)
 
 ### memory-hygiene (记忆数据库维护)
 **频率**: 每周日凌晨 02:00  

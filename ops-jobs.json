@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "defaults": {
+    "quietHours": { "start": "23:00", "end": "08:00" },
+    "reportEverySeconds": 600,
+    "stallSeconds": 1800,
+    "autoResume": false,
+    "autoResumeBackoffSeconds": 900
+  },
+  "jobs": [
+    {
+      "id": "system-health-monitor",
+      "name": "系统健康状态连续监控",
+      "kind": "long_running_read",
+      "enabled": true,
+      "risk": "read_only",
+      "cwd": "/root/.openclaw/workspace-zhenzhu",
+      "commands": {
+        "start": ["bash", "-lc", "while true; do python3 skills/ops-dashboard/scripts/ops_dashboard.py --show summary --workspace /root/.openclaw/workspace-zhenzhu; sleep 1800; done > /tmp/health-monitor.log 2>&1 & echo $!"],
+        "status": ["python3", "skills/ops-framework/scripts/health_status.py"]
+      },
+      "policy": {
+        "autoResume": true,
+        "reportEverySeconds": 600,
+        "stallSeconds": 1800,
+        "quietHours": { "start": "23:00", "end": "08:00" }
+      },
+      "approval": null,
+      "after": []
+    },
+    {
+      "id": "disk-space-check",
+      "name": "磁盘空间快速检查",
+      "kind": "one_shot_read",
+      "enabled": true,
+      "risk": "read_only",
+      "cwd": "/",
+      "commands": {
+        "run": ["bash", "-lc", "df -h / | tail -1 | awk '{print $5}' | tr -d '%'"]
+      },
+      "policy": {
+        "reportEverySeconds": 3600
+      },
+      "approval": null,
+      "after": []
+    },
+    {
+      "id": "heartbeat-check",
+      "name": "系统心跳检查",
+      "kind": "one_shot_read",
+      "enabled": true,
+      "risk": "read_only",
+      "cwd": "/root/.openclaw/workspace-zhenzhu",
+      "commands": {
+        "run": ["bash", "-lc", "pgrep -f 'ops_dashboard.py' > /dev/null && echo 'OK' || echo 'FAIL'"]
+      },
+      "policy": {
+        "reportEverySeconds": 600
+      },
+      "approval": null,
+      "after": []
+    },
+    {
+      "id": "gateway-health-check",
+      "name": "网关健康检查",
+      "kind": "one_shot_read",
+      "enabled": true,
+      "risk": "read_only",
+      "cwd": "/",
+      "commands": {
+        "run": ["bash", "-lc", "pgrep -f 'openclaw-gateway' > /dev/null && echo 'OK' || echo 'FAIL'"]
+      },
+      "policy": {
+        "reportEverySeconds": 600
+      },
+      "approval": null,
+      "after": []
+    }
+  ]
+}
