@@ -223,6 +223,18 @@ incidents/
 
 **首次运行**: 2026-03-17 14:03
 
+### memory-hygiene (记忆数据库维护)
+**频率**: 每周日凌晨 02:00  
+**调度**: crontab `0 2 * * 0 /root/.openclaw/workspace-zhenzhu/scripts/memory-hygiene.py`  
+**日志**: `/var/log/memory-hygiene.log`  
+**功能**: 
+- 数据库 VACUUM 压缩
+- 清理过期记录
+- 大小监控与报告
+**状态**: ✅ 已配置
+
+**首次运行**: 2026-03-17 14:09 (DB 68.0 KB, 已是最简状态)
+
 ---
 
 ## 📦 初始化完成报告
