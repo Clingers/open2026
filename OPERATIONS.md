@@ -136,11 +136,13 @@ alert status --active
 - ✅ Git 版本控制已初始化
 - ✅ 安装核心运维技能套件（6个技能）
 - ✅ 启动 system-health-monitor 长监控任务
+- ✅ 配置 systemd timer 自动运行 ops-monitor tick（每5分钟）
+- ✅ 实现基础监控输出（stdout/journald）
 
 ### 进行中 🔄
-- 🔄 **配置 systemd timer 自动运行 ops-monitor tick** - 使用 cron-scheduling 技能
-- 🔄 **配置 Telegram 告警通道** - 使用 rhandus-alerting-system
+- 🔄 **配置 Telegram 告警通道** - 使用 rhandus-alerting-system（需要 bot token 和 chat_id）
 - 🔄 **设置关键指标告警规则** - 磁盘、内存、CPU、服务健康
+- 🔄 **配置日志轮转策略** - 管理 /tmp/health-monitor.log
 
 ### 待完成 ⏳
 - ⏳ 建立日志轮转和归档策略
