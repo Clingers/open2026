@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "ops-dashboard": {
+      "name": "Ops Dashboard",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=ops-dashboard",
+      "source": "skillhub",
+      "version": "1.0.1"
+    },
+    "ops-framework": {
+      "name": "Ops Framework",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=ops-framework",
+      "source": "skillhub",
+      "version": "0.1.0"
+    }
+  }
+}
