@@ -1,0 +1,20 @@
+# Git ignore for Kid Ops workspace
+# Temporary logs
+*.log
+/tmp/
+/tmp/*
+
+# OpenClaw runtime state (unless intentional)
+.openclaw/workspace-state.json
+
+# Lock files
+*.lock
+*.tmp
+
+# Backup files
+*.bak
+*.backup
+
+# OS/cache
+.DS_Store
+Thumbs.db
