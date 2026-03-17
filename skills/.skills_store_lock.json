@@ -12,6 +12,30 @@
       "zip_url": "https://lightmake.site/api/v1/download?slug=ops-framework",
       "source": "skillhub",
       "version": "0.1.0"
+    },
+    "auto-monitor": {
+      "name": "Auto Monitor - System Monitoring",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=auto-monitor",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "log-analyzer": {
+      "name": "Log Analyzer",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=log-analyzer",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "cron-scheduling": {
+      "name": "Cron & Scheduling",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=cron-scheduling",
+      "source": "skillhub",
+      "version": "1.0.0"
+    },
+    "rhandus-alerting-system": {
+      "name": "Alerting & Notification System",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=rhandus-alerting-system",
+      "source": "skillhub",
+      "version": "1.0.0"
     }
   }
 }
