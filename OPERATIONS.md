@@ -213,6 +213,18 @@ incidents/
 
 ---
 
+## 🕐 定时任务配置
+
+### ops-monitor tick (报告生成)
+**频率**: 每 30 分钟  
+**调度**: crontab `*/30 * * * * /usr/local/bin/ops-monitor-tick`  
+**日志**: `/var/log/ops-monitor-tick.log`  
+**状态**: ✅ 已配置并运行中
+
+**首次运行**: 2026-03-17 14:03
+
+---
+
 ## 📦 初始化完成报告
 
 **日期**: 2025-03-17 12:18 GMT+8
