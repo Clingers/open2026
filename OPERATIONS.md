@@ -114,19 +114,25 @@ alert status --active
 ## 🚀 进行中的长监控项目
 
 ### system-health-monitor
-- **状态**: ✅ **运行中** (PID: 323172)
+- **状态**: ✅ **运行中** (通过 systemd timer 每5分钟触发)
 - **启动时间**: 2025-03-17 12:15
 - **类型**: 长运行读取任务
 - **频率**: 每5分钟收集一次健康指标
 - **自动恢复**: ✅ 启用
 - **配置文件**: `/root/.openclaw/net/config/ops-jobs.json`
-- **详细日志**: `monitoring/long-running-monitor.md`
+- **系统日志**: `journalctl -t ops-monitor`
+- **告警日志**: `/root/.openclaw/workspace-zhenzhu/monitoring/alerts.log` (如有异常)
 
 **监控指标**:
 - 磁盘使用率
 - Git 状态
 - 系统负载
 - 大目录占用
+
+**通知机制**:
+- ✅ 正常状态: 记录到 systemd journal (tag: ops-monitor)
+- ⚠️ 异常状态: 记录到 alerts.log 并可通过 wrapper 扩展通知
+- 🔄 可配置 Feishu/Telegram/Email 通知 (待配置)
 
 ---
 
@@ -140,9 +146,10 @@ alert status --active
 - ✅ 实现基础监控输出（stdout/journald）
 
 ### 进行中 🔄
-- 🔄 **配置 Telegram 告警通道** - 使用 rhandus-alerting-system（需要 bot token 和 chat_id）
-- 🔄 **设置关键指标告警规则** - 磁盘、内存、CPU、服务健康
-- 🔄 **配置日志轮转策略** - 管理 /tmp/health-monitor.log
+- 🔄 **配置 Feishu 通知集成** - 通过 openclaw message send 发送告警
+- 🔄 **配置 rhandus-alerting-system** - 高级告警规则和多通道通知
+- 🔄 **设置关键指标阈值告警** - 磁盘、内存、CPU、服务健康
+- 🔄 **配置日志轮转策略** - 管理 /tmp/health-monitor.log 和 alerts.log
 
 ### 待完成 ⏳
 - ⏳ 建立日志轮转和归档策略
@@ -150,6 +157,59 @@ alert status --active
 - ⏳ 创建 incident post-mortem 模板
 - ⏳ 设置 ops-dashboard 定期报告（日报/周报）
 - ⏳ 集成 Feishu/Telegram 通知渠道
+
+---
+
+## 📚 运维手册 (Playbooks)
+
+### 故障处理指南
+
+| 场景 | 手册 | 链接 |
+|------|------|------|
+| 磁盘空间不足 | Disk Space Crisis | `playbooks/disk-space-crisis.md` |
+| OpenClaw 服务宕机 | Gateway Recovery | `playbooks/openclaw-gateway-recovery.md` |
+| 监控告警失效 | Monitoring Failure | `playbooks/monitoring-failure.md` (待创建) |
+| 日志轮转问题 | Log Rotation | `playbooks/log-rotation.md` (待创建) |
+
+### 使用流程
+1. 识别问题类型
+2. 打开对应 playbook
+3. 按步骤执行
+4. 记录处理结果到 `incidents/` 目录
+
+### 演练计划
+- [ ] 每月一次故障演练
+- [ ] 每季度更新 playbooks
+- [ ] 每次实际故障后优化流程
+
+---
+
+## 📝 事件管理 (Incidents)
+
+### 目录结构
+```
+incidents/
+├── TEMPLATE.md           # 报告模板
+├── YYYY-MM-DD-title.md   # 历史事件报告
+└── index.md              # 事件索引（自动生成）
+```
+
+### 报告规范
+- 发现后24小时内提交报告
+- 使用 `TEMPLATE.md` 作为基础
+- 关注根因分析而非表面现象
+- 包含可执行的改进措施
+
+### 跟踪表格（自动维护）
+
+| 事件 | 严重性 | 开始时间 | 解决时间 | MTTR | 根本原因 |
+|------|--------|----------|----------|------|----------|
+| [查看所有](incidents/) | - | - | - | - | - |
+
+### 事后复盘 (Post-Mortem)
+- 技术复盘: 发生了什么？为什么？
+- 流程复盘: 响应是否及时？沟通是否顺畅？
+- 改进复盘: 如何防止再次发生？
 
 ---
 
