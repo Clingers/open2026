@@ -215,3 +215,82 @@ MIT License
 **开发者**: 德善 (code @ Project OpenClaw)  
 **版本**: v1.0.0-MVP | 2026-03-26  
 **灵感来源**: Minitab 统计分析工具
+
+---
+
+## 🌐 在线演示
+
+访问 GitHub Pages 静态演示页面：
+
+**[https://clingers.github.io/open2026/](https://clingers.github.io/open2026/)**
+
+*注意：演示页面为静态版本，仅展示 UI 和交互流程。完整分析功能需部署后端服务。*
+
+---
+
+## 🚀 完整部署（后端 + 前端）
+
+### 方式1：本地运行
+
+```bash
+# 安装依赖
+pip install -r requirements.txt
+
+# 启动后端 API (Flask)
+python3 -m web.app
+
+# 在新终端启动前端（或直接访问 docs/index.html）
+# 前端为静态页面，可双击打开使用
+```
+
+访问：
+- Web UI: http://localhost:5000 (需后端)
+- 静态演示: file:///path/to/docs/index.html
+
+### 方式2：云服务器部署
+
+```bash
+# 1. 拉取代码
+git clone https://github.com/Clingers/open2026.git
+cd open2026
+
+# 2. 安装依赖（生产环境建议使用 gunicorn）
+pip install -r requirements.txt
+
+# 3. 启动服务
+python3 -m web.app --host 0.0.0.0 --port 5000
+
+# 4. 配置反向代理（Nginx）和系统服务（systemd）
+```
+
+---
+
+## 📦 项目结构
+
+```
+├── docs/                    # GitHub Pages 静态文件
+│   └── index.html          # 演示页面
+├── web/                    # 后端 Flask 应用
+│   ├── app.py
+│   └── templates/
+├── cli/                    # 命令行工具
+├── core/                   # 核心分析模块
+├── data/                   # 示例数据
+├── output/                 # 生成结果目录
+├── iqs.py                  # 主入口 (推荐)
+├── iqs.sh / iqs.bat        # 启动脚本
+├── README.md
+└── requirements.txt
+```
+
+---
+
+## 📄 许可证
+
+MIT License
+
+---
+
+**开发者**: 德善 (code @ Project OpenClaw)  
+**版本**: v1.0.0-MVP | 2026-03-26  
+**GitHub**: https://github.com/Clingers/open2026
