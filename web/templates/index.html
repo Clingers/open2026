@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工业质量统计 - Web UI</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f7fa; color: #333; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        header { background: linear-gradient(135deg, #0066cc, #00aaff); color: white; padding: 2rem; border-radius: 12px 12px 0 0; text-align: center; }
+        header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        header p { opacity: 0.9; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+        select, input[type="number"], input[type="text"] { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+        button { background: #0066cc; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #0052a3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .file-upload { border: 2px dashed #ccc; padding: 2rem; text-align: center; border-radius: 12px; cursor: pointer; transition: border-color 0.2s; }
+        .file-upload:hover { border-color: #0066cc; }
+        .file-info { margin-top: 1rem; font-size: 0.9rem; color: #666; }
+        .column-tag { display: inline-block; background: #e3f2fd; padding: 0.25rem 0.5rem; margin: 0.25rem; border-radius: 4px; font-size: 0.85rem; cursor: pointer; border: 1px solid transparent; }
+        .column-tag:hover { border-color: #0066cc; }
+        .column-tag.selected { background: #0066cc; color: white; }
+        #results { display: none; }
+        .result-item { padding: 1rem; background: #f9f9f9; border-left: 4px solid #0066cc; margin-bottom: 0.5rem; border-radius: 4px; }
+        .download-link { display: inline-block; margin: 0.25rem; padding: 0.4rem 0.8rem; background: #28a745; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem; }
+        .download-link:hover { background: #218838; }
+        .loading { display: none; text-align: center; padding: 2rem; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0066cc; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error { background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏭 工业质量统计工具</h1>
+            <p>Industrial Quality Statistics (类似 Minitab)</p>
+        </header>
+
+        <div class="card">
+            <h2>📤 上传 CSV 数据</h2>
+            <div class="file-upload" onclick="document.getElementById('file-input').click()">
+                <p>点击选择 CSV 文件，或拖拽文件到这里</p>
+                <input type="file" id="file-input" accept=".csv" style="display: none" onchange="handleFileSelect(event)">
+            </div>
+            <div id="file-info" class="file-info" style="display: none;"></div>
+        </div>
+
+        <div class="card" id="analysis-card" style="display: none;">
+            <h2>📊 选择分析列</h2>
+            <div class="form-group">
+                <label>数据列（点击选择）:</label>
+                <div id="column-list"></div>
+            </div>
+            
+            <div class="form-group" id="spec-limits" style="display: none;">
+                <label>规格限 (可选):</label>
+                <div style="display: flex; gap: 1rem;">
+                    <input type="number" id="lsl" placeholder="下规格限 (LSL)">
+                    <input type="number" id="usl" placeholder="上规格限 (USL)">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>分析类型:</label>
+                <select id="analysis-type">
+                    <option value="report">完整报告 (推荐)</option>
+                    <option value="stats">基础统计</option>
+                    <option value="spc">SPC 控制图</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="subgroup-size-group" style="display: none;">
+                <label>子组大小:</label>
+                <input type="number" id="subgroup-size" value="5" min="2" max="20">
+            </div>
+            
+            <button onclick="runAnalysis()" id="analyze-btn">生成分析</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在生成报告，请稍候...</p>
+        </div>
+
+        <div id="results">
+            <div class="card">
+                <h2>✅ 分析结果</h2>
+                <div id="result-content"></div>
+            </div>
+        </div>
+
+        <div id="error-container"></div>
+    </div>
+
+    <script>
+        let selectedColumn = null;
+        let currentFilename = null;
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.name.endsWith('.csv')) {
+                alert('请上传CSV文件');
+                return;
+            }
+            
+            currentFilename = file.name;
+            document.getElementById('file-info').innerHTML = `
+                <strong>已选择:</strong> ${file.name}<br>
+                <small>正在读取列信息...</small>
+            `;
+            document.getElementById('file-info').style.display = 'block';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                
+                document.getElementById('file-info').innerHTML = `
+                    <strong>✅ 已上传:</strong> ${data.filename}<br>
+                    <small>行数: ${data.rows} | 列数: ${data.columns.length}</small>
+                `;
+                
+                renderColumnList(data.columns);
+                document.getElementById('analysis-card').style.display = 'block';
+            })
+            .catch(err => {
+                document.getElementById('file-info').innerHTML = `<span class="error">错误: ${err.message}</span>`;
+            });
+        }
+
+        function renderColumnList(columns) {
+            const container = document.getElementById('column-list');
+            container.innerHTML = columns.map(col => 
+                `<span class="column-tag" onclick="selectColumn('${col}')">${col}</span>`
+            ).join('');
+        }
+
+        function selectColumn(col) {
+            selectedColumn = col;
+            document.querySelectorAll('.column-tag').forEach(tag => {
+                tag.classList.toggle('selected', tag.textContent === col);
+            });
+            
+            // 如果选择了列，显示规格限选项（针对报告）
+            const specGroup = document.getElementById('spec-limits');
+            if (document.getElementById('analysis-type').value === 'report') {
+                specGroup.style.display = 'block';
+            } else {
+                specGroup.style.display = 'none';
+            }
+        }
+
+        document.getElementById('analysis-type').addEventListener('change', (e) => {
+            if (e.target.value === 'report') {
+                document.getElementById('spec-limits').style.display = 'block';
+            } else {
+                document.getElementById('spec-limits').style.display = 'none';
+            }
+            
+            if (e.target.value === 'spc') {
+                document.getElementById('subgroup-size-group').style.display = 'block';
+            } else {
+                document.getElementById('subgroup-size-group').style.display = 'none';
+            }
+        });
+
+        function runAnalysis() {
+            if (!selectedColumn) {
+                alert('请先选择一个数据列');
+                return;
+            }
+            
+            const data = {
+                filename: currentFilename,
+                column: selectedColumn,
+                type: document.getElementById('analysis-type').value,
+                lsl: parseFloat(document.getElementById('lsl').value) || null,
+                usl: parseFloat(document.getElementById('usl').value) || null,
+                subgroup_size: parseInt(document.getElementById('subgroup-size').value) || 5
+            };
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('error-container').innerHTML = '';
+            
+            fetch('/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(result => {
+                document.getElementById('loading').style.display = 'none';
+                if (result.error) throw new Error(result.error);
+                
+                displayResults(result);
+            })
+            .catch(err => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error-container').innerHTML = `
+                    <div class="card">
+                        <div class="error">分析失败: ${err.message}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function displayResults(result) {
+            const container = document.getElementById('result-content');
+            
+            if (result.session) {
+                let html = `<p><strong>会话 ID:</strong> ${result.session}</p>`;
+                
+                if (result.files && result.files.length > 0) {
+                    html += '<h3>下载链接:</h3>';
+                    result.files.forEach(file => {
+                        const isPdf = file.name.endsWith('.pdf');
+                        html += `<a href="${file.url}" class="download-link" download>
+                                    ${isPdf ? '📄' : '🖼️'} ${file.name}
+                                 </a>`;
+                    });
+                    html += '<p><small>PDF报告包含所有图表和统计数据</small></p>';
+                }
+                
+                if (result.result) {
+                    html += '<h3>统计摘要:</h3><div class="result-item">';
+                    for (const [key, value] of Object.entries(result.result)) {
+                        html += `<strong>${key}:</strong> ${value}<br>`;
+                    }
+                    html += '</div>';
+                }
+                
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            }
+            
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

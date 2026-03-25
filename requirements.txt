@@ -1,0 +1,31 @@
+# 项目依赖
+# Python 3.10+
+
+# 数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+openpyxl>=3.1.0  # Excel支持
+xlrd>=2.0.0      # 旧Excel格式
+
+# 统计计算
+scipy>=1.10.0
+statsmodels>=0.14.0
+
+# 图表绘制
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.14.0  # 可选交互图表
+
+# PDF报告
+reportlab>=4.0.0
+jinja2>=3.1.0
+
+# Web界面 (可选)
+fastapi>=0.100.0
+uvicorn>=0.23.0
+python-multipart>=0.0.6
+
+# 工具
+pyyaml>=6.0
+click>=8.1.0  # CLI框架
+pytest>=7.4.0 # 测试
