@@ -1,9 +1,21 @@
 # 工业质量统计分析工具
 
-**版本**: 1.0.0-mvp  
+**版本**: 2.1.0  
 **创建**: 2026-03-26 02:31  
+**更新**: 2026-03-26 11:30  
 **作者**: 德善 (code)  
 **目标用户**: 工厂/质量工程师
+
+---
+
+## 🎉 v2.1.0 新特性
+
+- ✨ **新增图表类型**: 时间序列图、帕累托图
+- 🧠 **智能洞察引擎**: 自动生成分析摘要、关键发现、改进建议
+- 🎨 **UI 美化升级**: Bootstrap 5 现代化界面，响应式设计
+- 📱 **拖拽上传**: 支持拖放 CSV 文件
+- 🔧 **代码优化**: 模块化架构，utils.py 统一工具函数
+- 🐛 **Bug 修复**: 修复 CSV 注释行处理、列名空格、路径问题
 
 ---
 
@@ -17,20 +29,26 @@
 
 ### 📈 Minitab风格图表
 - **SPC控制图**: X-R图、X-S图、p图、np图
-- **评估图**: 直方图、箱线图、QQ图、茎叶图
+- **评估图 (6种)**: 直方图、箱线图、QQ图、茎叶图、时间序列图、帕累托图
 - **热力图**: 相关性热力图、数据密度热力图
 - **方程分析**: 散点图、回归拟合、残差分析
+- **过程能力**: Cp/Cpk 分析（需规格限）
+
+### 🧠 智能洞察
+- 每个分析自动生成文字报告
+- 总体摘要、关键发现、改进建议
+- 异常检测、趋势分析、稳定性评估
 
 ### 📊 数据支持
-- CSV / Excel 文件导入
-- 多工作表支持
+- CSV 文件导入（支持注释行 #）
 - 自动数据类型识别
 - 缺失值处理
+- 列名自动去空格
 
 ### 📄 报告输出
 - PNG 高质量图表
 - PDF 综合分析报告
-- Excel 统计数据导出
+- 浏览器直接渲染（无需下载）
 - JSON 格式数据接口
 
 ---
@@ -47,24 +65,45 @@ pip install -r requirements.txt
 
 ```bash
 # 基础统计
-python -m iqs stats --file data/sample.csv --column diameter
+python -m cli.main stats --file data/sample.csv --column diameter
+
+# 评估图 (6种类型)
+python -m cli.main assess --file data/sample.csv --column diameter --type histogram
+python -m cli.main assess --file data/sample.csv --column diameter --type timeseries
+python -m cli.main assess --file data/sample.csv --column diameter --type pareto
 
 # 生成SPC X-R控制图
-python -m iqs spc --file data/production.csv --type xr --output output/
+python -m cli.main spc --file data/production.csv --column diameter --subgroup-size 5
 
 # 生成热力图 (相关性)
-python -m iqs heatmap --file data/quality_matrix.csv --output output/heatmap.png
+python -m cli.main heatmap --file data/quality_matrix.csv
+
+# 回归分析
+python -m cli.main regression --file data/regression.csv --x temperature --y quality
+
+# 过程能力分析
+python -m cli.main capability --file data/sample.csv --column diameter --lsl 9.8 --usl 10.2
 
 # 完整分析报告
-python -m iqs report --file data/sample.csv --output report.pdf
+python -m cli.main report --file data/sample.csv --column diameter --lsl 9.8 --usl 10.2
 ```
 
-### Web界面 (可选)
+### Web界面 (推荐)
 
 ```bash
-python -m iqs.web
-# 访问 http://localhost:8080
+cd web
+source venv/bin/activate  # 激活虚拟环境
+python app.py
+# 访问 http://localhost:5000
 ```
+
+**Web 功能**:
+- 📊 7 种分析类型（基础统计、SPC、评估图、热力图、回归、能力、报告）
+- 🎨 Bootstrap 5 现代化界面
+- 🖱️ 拖拽上传 CSV 文件
+- 🧠 智能洞察自动生成
+- 📱 响应式设计（移动端友好）
+- 🖼️ 图片/PDF 浏览器直接渲染
 
 ---
 
@@ -130,31 +169,58 @@ output:
 ## 开发状态
 
 - [x] 项目结构创建
-- [ ] 核心统计模块 (进行中)
-- [ ] SPC控制图
-- [ ] 评估图
-- [ ] 热力图
-- [ ] 方程分析
-- [ ] CLI命令
-- [ ] Web界面
-- [ ] 文档
+- [x] 核心统计模块
+- [x] SPC控制图 (X-R)
+- [x] 评估图 (6种：直方图/箱线图/QQ/茎叶/时间序列/帕累托)
+- [x] 热力图 (相关性矩阵)
+- [x] 回归分析 (线性回归)
+- [x] 过程能力 (Cp/Cpk)
+- [x] CLI命令 (7个命令)
+- [x] Web界面 (Flask + Bootstrap 5)
+- [x] PDF报告生成
+- [x] 智能洞察引擎
+- [x] UI 美化 (响应式设计)
+- [ ] Docker 容器化
+- [ ] 单元测试
 
 ---
 
-**开始使用**: `python -m iqs --help`│   ├── spc.py          # SPC控制图 (X-R)
-│   ├── assessment.py   # 评估图 (直方图/箱线图/QQ/茎叶)
+**开始使用**: `python -m iqs --help`## 项目结构
+
+```
+industrial-quality-stats/
+├── core/
+│   ├── statistics.py    # 基础统计计算
+│   ├── spc.py          # SPC控制图 (X-R)
+│   ├── assessment.py   # 评估图 (直方图/箱线图/QQ/茎叶/时间序列/帕累托)
+│   ├── insights.py     # 智能洞察引擎 ⭐ NEW
 │   ├── heatmap.py      # 热力图
 │   ├── regression.py   # 回归分析
 │   ├── capability.py   # 过程能力 (Cp/Cpk)
 │   └── report.py       # PDF报告生成器
 ├── cli/                # 命令行接口
-│   └── main.py         # CLI命令集
+│   └── main.py         # CLI命令集 (7个命令)
+├── web/                # Web 后端 Flask 应用
+│   ├── app.py          # Flask API (7个端点)
+│   ├── utils.py        # 工具函数模块 ⭐ NEW
+│   ├── templates/
+│   │   └── index.html  # Bootstrap 5 美化界面 ⭐ UPDATED
+│   └── venv/           # Python 虚拟环境
 ├── data/               # 示例数据
 │   ├── diameter_clean.csv
 │   ├── quality_matrix.csv
 │   └── regression_clean.csv
-└── output/             # 输出目录 (PNG + PDF)
+├── output/             # 输出目录 (PNG + PDF)
+│   └── web_output/     # Web 输出目录
+├── release.sh          # 自动发布脚本 ⭐ NEW
+├── requirements.txt    # Python依赖
+└── README.md           # 本文档
 ```
+
+**核心文件说明**:
+- `web/utils.py`: 统一错误处理、工具函数、SPC 系数表
+- `core/insights.py`: InsightGenerator 类，自动生成分析洞察
+- `web/templates/index.html`: Bootstrap 5 原生响应式设计，支持拖拽上传
 
 ---
 
@@ -292,5 +358,20 @@ MIT License
 ---
 
 **开发者**: 德善 (code @ Project OpenClaw)  
-**版本**: v1.0.0-MVP | 2026-03-26  
+**版本**: v2.1.0 | 2026-03-26  
 **GitHub**: https://github.com/Clingers/open2026
+
+---
+
+## 📦 依赖项
+
+```
+Flask==3.0.0
+pandas==2.1.4
+matplotlib==3.8.2
+scipy==1.11.4
+seaborn==0.13.0
+reportlab==4.0.7
+scikit-learn==1.3.2
+numpy==1.26.2
+```

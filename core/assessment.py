@@ -143,3 +143,112 @@ class AssessmentCharts:
             lines.append(f"{stem:>3} | {leaves_str}")
         
         return "\n".join(lines)
+    
+    @staticmethod
+    def timeseries(data: List[float], title: str = "时间序列图", **kwargs) -> plt.Figure:
+        """时间序列图 (显示数据采集顺序的趋势)"""
+        fig, ax = plt.subplots(figsize=kwargs.get("figsize", (12, 6)))
+        
+        x = list(range(1, len(data) + 1))
+        y = data
+        
+        # 绘制数据点和连线
+        ax.plot(x, y, marker='o', linewidth=2, markersize=6, 
+                color=kwargs.get("color", "#1f77b4"), label='测量值')
+        
+        # 计算并绘制中心线（均值）
+        mean = np.mean(data)
+        ax.axhline(mean, color='red', linestyle='--', linewidth=2, label=f'均值={mean:.4f}')
+        
+        # 计算并绘制警告限（±2σ）和动作限（±3σ）
+        std = np.std(data, ddof=1)
+        ax.axhline(mean + 2*std, color='orange', linestyle=':', linewidth=1.5, label='+2σ 警告限')
+        ax.axhline(mean - 2*std, color='orange', linestyle=':', linewidth=1.5, label='-2σ 警告限')
+        ax.axhline(mean + 3*std, color='red', linestyle=':', linewidth=1.5, label='+3σ 动作限')
+        ax.axhline(mean - 3*std, color='red', linestyle=':', linewidth=1.5, label='-3σ 动作限')
+        
+        # 异常点检测（超出3σ）
+        outliers = [(i, val) for i, val in enumerate(y, 1) if abs(val - mean) > 3*std]
+        if outliers:
+            outlier_x, outlier_y = zip(*outliers)
+            ax.scatter(outlier_x, outlier_y, color='red', s=100, zorder=5, 
+                      marker='X', label=f'异常点 ({len(outliers)}个)')
+        
+        ax.set_xlabel(kwargs.get("xlabel", "观测序号"))
+        ax.set_ylabel(kwargs.get("ylabel", "测量值"))
+        ax.set_title(title, fontsize=14, pad=15)
+        ax.legend(loc='best')
+        ax.grid(True, alpha=0.3)
+        
+        # 添加统计文本
+        stats_text = f'n={len(data)}, μ={mean:.4f}, σ={std:.4f}, CV={std/mean*100:.1f}%'
+        ax.text(0.02, 0.98, stats_text, transform=ax.transAxes, 
+                va='top', ha='left', fontsize=9,
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+        
+        plt.tight_layout()
+        return fig
+    
+    @staticmethod
+    def pareto(data: List[float], title: str = "帕累托图", **kwargs) -> plt.Figure:
+        """帕累托图 (频数分布分析)
+        
+        参数:
+            data: 可以是数值型频数，也可以是类别标签（自动统计频数）
+        """
+        # 判断数据类型：如果看起来像类别（整数或字符串），则统计频数
+        unique_vals = set(data)
+        
+        # 如果数据点不多但唯一值较多，可能是原始观测值，需要统计频数
+        if len(unique_vals) <= len(data) * 0.5 and not all(isinstance(x, (int, float)) for x in unique_vals):
+            # 类别数据：统计频数
+            from collections import Counter
+            counter = Counter(data)
+            values = list(counter.values())
+            labels = list(counter.keys())
+        else:
+            # 假设 data 已经是频数值，使用索引作为标签
+            values = data
+            labels = [f"类别{i+1}" for i in range(len(data))]
+        
+        # 排序：从大到小
+        sorted_pairs = sorted(zip(values, labels), reverse=True)
+        vals, labs = zip(*sorted_pairs) if sorted_pairs else ([], [])
+        
+        # 计算累计百分比
+        total = sum(vals)
+        cum_percent = np.cumsum(vals) / total * 100
+        
+        fig, ax1 = plt.subplots(figsize=kwargs.get("figsize", (12, 7)))
+        
+        # 柱状图
+        bars = ax1.bar(range(len(vals)), vals, 
+                       color=kwargs.get("color", "#1f77b4"), 
+                       alpha=0.7, edgecolor='black')
+        ax1.set_xlabel(kwargs.get("xlabel", "类别"))
+        ax1.set_ylabel(kwargs.get("ylabel", "频数"))
+        ax1.set_xticks(range(len(labs)))
+        ax1.set_xticklabels(labs, rotation=45, ha='right')
+        if vals:
+            ax1.set_ylim(0, max(vals) * 1.1)
+        
+        # 累计百分比线
+        ax2 = ax1.twinx()
+        ax2.plot(range(len(vals)), cum_percent, color='red', marker='o', 
+                linewidth=2, markersize=6, label='累计百分比')
+        ax2.set_ylabel('累计百分比 (%)')
+        ax2.set_ylim(0, 110)
+        
+        # 80%线
+        ax2.axhline(80, color='orange', linestyle='--', linewidth=1.5, label='80%阈值')
+        
+        # 关键少数高亮
+        critical_indices = [i for i, cp in enumerate(cum_percent) if cp <= 80]
+        if critical_indices:
+            ax2.fill_between(critical_indices, 0, [cum_percent[i] for i in critical_indices], 
+                            alpha=0.3, color='orange', label='关键少数')
+        
+        ax1.set_title(title, fontsize=14, pad=15)
+        fig.legend(loc='upper left', bbox_to_anchor=(0.1, 0.9))
+        plt.tight_layout()
+        return fig

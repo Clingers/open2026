@@ -3,184 +3,583 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工业质量统计 - Web UI</title>
+    <title>🏭 工业质量统计工具</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f7fa; color: #333; line-height: 1.6; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
-        header { background: linear-gradient(135deg, #0066cc, #00aaff); color: white; padding: 2rem; border-radius: 12px 12px 0 0; text-align: center; }
-        header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-        header p { opacity: 0.9; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem; }
-        .form-group { margin-bottom: 1.5rem; }
-        label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
-        select, input[type="number"], input[type="text"] { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
-        button { background: #0066cc; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: #0052a3; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        .file-upload { border: 2px dashed #ccc; padding: 2rem; text-align: center; border-radius: 12px; cursor: pointer; transition: border-color 0.2s; }
-        .file-upload:hover { border-color: #0066cc; }
-        .file-info { margin-top: 1rem; font-size: 0.9rem; color: #666; }
-        .column-tag { display: inline-block; background: #e3f2fd; padding: 0.25rem 0.5rem; margin: 0.25rem; border-radius: 4px; font-size: 0.85rem; cursor: pointer; border: 1px solid transparent; }
-        .column-tag:hover { border-color: #0066cc; }
-        .column-tag.selected { background: #0066cc; color: white; }
-        #results { display: none; }
-        .result-item { padding: 1rem; background: #f9f9f9; border-left: 4px solid #0066cc; margin-bottom: 0.5rem; border-radius: 4px; }
-        .download-link { display: inline-block; margin: 0.25rem; padding: 0.4rem 0.8rem; background: #28a745; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9rem; }
-        .download-link:hover { background: #218838; }
-        .loading { display: none; text-align: center; padding: 2rem; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0066cc; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .error { background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
-        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-info { background: #d1ecf1; color: #0c5460; }
+        :root {
+            --primary-gradient: linear-gradient(135deg, #0066cc, #00aaff);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        .main-header {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 102, 204, 0.2);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .main-header .header-content {
+            padding: 2.5rem;
+            text-align: center;
+        }
+        
+        .main-header h1 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+        
+        .main-header .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .file-upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .file-upload-area:hover {
+            border-color: #0066cc;
+            background: rgba(0, 102, 204, 0.05);
+        }
+        
+        .file-upload-area i {
+            font-size: 3rem;
+            color: #0066cc;
+            margin-bottom: 1rem;
+        }
+        
+        .column-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .column-tag:hover {
+            border-color: #0066cc;
+            transform: scale(1.05);
+        }
+        
+        .column-tag.selected {
+            background: var(--primary-gradient);
+            color: white;
+            border-color: #0066cc;
+        }
+        
+        .column-tag i {
+            font-size: 0.9rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .form-select, .form-control {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .form-select:focus, .form-control:focus {
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #results {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-section {
+            background: #f8fafc;
+            border-left: 4px solid #0066cc;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .result-image {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+        
+        .result-pdf {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            min-height: 800px;
+            margin-bottom: 1rem;
+        }
+        
+        .result-text {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        
+        .badge-chart {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e5e7eb;
+            border-top: 5px solid #0066cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        .alert-custom {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success-custom {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+        }
+        
+        .alert-error-custom {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title i {
+            color: #0066cc;
+        }
+        
+        .file-info-box {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #bae6fd;
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        
+        .stat-card:hover {
+            border-color: #0066cc;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0066cc;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-header .header-content {
+                padding: 1.5rem;
+            }
+            
+            .main-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🏭 工业质量统计工具</h1>
-            <p>Industrial Quality Statistics (类似 Minitab)</p>
-        </header>
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="main-header">
+            <div class="header-content">
+                <h1><i class="bi bi-gear-wide-connected"></i> 工业质量统计工具</h1>
+                <p class="subtitle">Industrial Quality Statistics - 专业统计分析平台</p>
+            </div>
+        </div>
 
+        <!-- File Upload Card -->
         <div class="card">
-            <h2>📤 上传 CSV 数据</h2>
-            <div class="file-upload" onclick="document.getElementById('file-input').click()">
-                <p>点击选择 CSV 文件，或拖拽文件到这里</p>
-                <input type="file" id="file-input" accept=".csv" style="display: none" onchange="handleFileSelect(event)">
+            <div class="card-header">
+                <i class="bi bi-upload"></i> 上传 CSV 数据
             </div>
-            <div id="file-info" class="file-info" style="display: none;"></div>
-        </div>
-
-        <div class="card" id="analysis-card" style="display: none;">
-            <h2>📊 选择分析列</h2>
-            <div class="form-group">
-                <label>数据列（点击选择）:</label>
-                <div id="column-list"></div>
-            </div>
-            
-            <div class="form-group" id="spec-limits" style="display: none;">
-                <label>规格限 (可选):</label>
-                <div style="display: flex; gap: 1rem;">
-                    <input type="number" id="lsl" placeholder="下规格限 (LSL)">
-                    <input type="number" id="usl" placeholder="上规格限 (USL)">
+            <div class="card-body">
+                <div class="file-upload-area" onclick="document.getElementById('file-input').click()" id="drop-zone">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <h4>点击选择 CSV 文件，或拖拽文件到这里</h4>
+                    <p class="text-muted">支持标准 CSV 格式，自动处理注释行 (#)</p>
+                    <input type="file" id="file-input" accept=".csv" class="d-none" onchange="handleFileSelect(event)">
                 </div>
+                <div id="file-info" class="file-info-box" style="display: none;"></div>
             </div>
-            
-            <div class="form-group">
-                <label>分析类型:</label>
-                <select id="analysis-type">
-                    <option value="report">完整报告 (推荐)</option>
-                    <option value="stats">基础统计</option>
-                    <option value="spc">SPC 控制图</option>
-                </select>
-            </div>
-            
-            <div class="form-group" id="subgroup-size-group" style="display: none;">
-                <label>子组大小:</label>
-                <input type="number" id="subgroup-size" value="5" min="2" max="20">
-            </div>
-            
-            <button onclick="runAnalysis()" id="analyze-btn">生成分析</button>
         </div>
 
-        <div class="loading" id="loading">
+        <!-- Analysis Card -->
+        <div class="card" id="analysis-card" style="display: none;">
+            <div class="card-header">
+                <i class="bi bi-sliders"></i> 选择分析参数
+            </div>
+            <div class="card-body">
+                <!-- Column Selection -->
+                <div class="mb-4">
+                    <label class="form-label">📊 数据列（点击选择）:</label>
+                    <div id="column-list" class="d-flex flex-wrap gap-2"></div>
+                </div>
+                
+                <!-- Analysis Type -->
+                <div class="mb-3">
+                    <label class="form-label">🔧 分析类型:</label>
+                    <select class="form-select" id="analysis-type" onchange="updateAnalysisOptions()">
+                        <option value="report">📋 完整报告 (recommended)</option>
+                        <option value="stats">📈 基础统计</option>
+                        <option value="spc">📉 SPC 控制图</option>
+                        <option value="assess">📊 评估图</option>
+                        <option value="heatmap">🔥 热力图</option>
+                        <option value="regression">📐 回归分析</option>
+                        <option value="capability">🎯 过程能力分析</option>
+                    </select>
+                </div>
+                
+                <!-- Subgroup Size (SPC) -->
+                <div class="mb-3" id="subgroup-size-group" style="display: none;">
+                    <label class="form-label">子组大小 (SPC):</label>
+                    <input type="number" class="form-control" id="subgroup-size" value="5" min="2" max="20">
+                </div>
+                
+                <!-- Chart Type (Assess) -->
+                <div class="mb-3" id="chart-type-group" style="display: none;">
+                    <label class="form-label">评估图类型:</label>
+                    <select class="form-select" id="chart-type">
+                        <option value="histogram">📊 直方图</option>
+                        <option value="boxplot">📦 箱线图</option>
+                        <option value="qqplot">📈 QQ图</option>
+                        <option value="stemleaf">📝 茎叶图</option>
+                        <option value="timeseries">📅 时间序列图</option>
+                        <option value="pareto">📊 帕累托图</option>
+                    </select>
+                </div>
+                
+                <!-- Regression Inputs -->
+                <div class="mb-3" id="regression-inputs" style="display: none;">
+                    <label class="form-label">回归分析变量:</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="regression-x" placeholder="自变量 X 列名">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="regression-y" placeholder="因变量 Y 列名">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Spec Limits -->
+                <div class="mb-4" id="spec-limits-group" style="display: none;">
+                    <label class="form-label">规格限 (LSL/USL):</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">LSL</span>
+                                <input type="number" class="form-control" id="lsl" placeholder="下限规格" step="any">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">USL</span>
+                                <input type="number" class="form-control" id="usl" placeholder="上限规格" step="any">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analyze Button -->
+                <button class="btn btn-primary w-100" id="analyze-btn" onclick="runAnalysis()">
+                    <i class="bi bi-play-circle"></i> 生成分析
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loader" id="loading">
             <div class="spinner"></div>
-            <p>正在生成报告，请稍候...</p>
+            <h4>正在生成分析报告...</h4>
+            <p class="text-muted">请稍候，系统正在处理您的数据</p>
         </div>
 
+        <!-- Results -->
         <div id="results">
             <div class="card">
-                <h2>✅ 分析结果</h2>
-                <div id="result-content"></div>
+                <div class="card-header">
+                    <i class="bi bi-check-circle"></i> 分析结果
+                </div>
+                <div class="card-body">
+                    <div id="result-content"></div>
+                </div>
             </div>
         </div>
 
+        <!-- Error Container -->
         <div id="error-container"></div>
     </div>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         let selectedColumn = null;
         let currentFilename = null;
-
+        
+        // Drag and drop support
+        const dropZone = document.getElementById('drop-zone');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#0066cc';
+            dropZone.style.background = 'rgba(0, 102, 204, 0.1)';
+        });
+        
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#cbd5e1';
+            dropZone.style.background = 'rgba(255, 255, 255, 0.5)';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#cbd5e1';
+            dropZone.style.background = 'rgba(255, 255, 255, 0.5)';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
         function handleFileSelect(event) {
             const file = event.target.files[0];
-            if (!file) return;
-            
+            if (file) {
+                handleFile(file);
+            }
+        }
+        
+        async function handleFile(file) {
             if (!file.name.endsWith('.csv')) {
                 alert('请上传CSV文件');
                 return;
             }
             
-            currentFilename = file.name;
-            document.getElementById('file-info').innerHTML = `
-                <strong>已选择:</strong> ${file.name}<br>
-                <small>正在读取列信息...</small>
-            `;
-            document.getElementById('file-info').style.display = 'block';
-            
             const formData = new FormData();
             formData.append('file', file);
             
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) throw new Error(data.error);
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
                 
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                currentFilename = result.filename;
+                displayColumns(result.columns);
                 document.getElementById('file-info').innerHTML = `
-                    <strong>✅ 已上传:</strong> ${data.filename}<br>
-                    <small>行数: ${data.rows} | 列数: ${data.columns.length}</small>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-check text-success"></i>
+                        <strong>${result.filename}</strong>
+                        <span class="badge bg-success">✅ 已上传</span>
+                        <span class="text-muted">行数: ${result.rows} | 列数: ${result.columns.length}</span>
+                    </div>
                 `;
-                
-                renderColumnList(data.columns);
+                document.getElementById('file-info').style.display = 'block';
                 document.getElementById('analysis-card').style.display = 'block';
-            })
-            .catch(err => {
-                document.getElementById('file-info').innerHTML = `<span class="error">错误: ${err.message}</span>`;
-            });
+                
+            } catch (error) {
+                alert('上传失败: ' + error.message);
+            }
         }
-
-        function renderColumnList(columns) {
+        
+        function displayColumns(columns) {
             const container = document.getElementById('column-list');
-            container.innerHTML = columns.map(col => 
-                `<span class="column-tag" onclick="selectColumn('${col}')">${col}</span>`
-            ).join('');
+            container.innerHTML = '';
+            
+            columns.forEach(col => {
+                const tag = document.createElement('div');
+                tag.className = 'column-tag';
+                tag.innerHTML = `<i class="bi bi-plus-circle"></i> ${col}`;
+                tag.onclick = () => selectColumn(col, tag);
+                container.appendChild(tag);
+            });
         }
-
-        function selectColumn(col) {
-            selectedColumn = col;
-            document.querySelectorAll('.column-tag').forEach(tag => {
-                tag.classList.toggle('selected', tag.textContent === col);
+        
+        function selectColumn(column, element) {
+            // Remove previous selection
+            document.querySelectorAll('.column-tag').forEach(t => {
+                t.classList.remove('selected');
+                t.innerHTML = `<i class="bi bi-plus-circle"></i> ${t.textContent.trim()}`;
             });
             
-            // 如果选择了列，显示规格限选项（针对报告）
-            const specGroup = document.getElementById('spec-limits');
-            if (document.getElementById('analysis-type').value === 'report') {
-                specGroup.style.display = 'block';
-            } else {
-                specGroup.style.display = 'none';
+            // Mark selected
+            element.classList.add('selected');
+            element.innerHTML = `<i class="bi bi-check-circle"></i> ${column}`;
+            selectedColumn = column;
+        }
+        
+        function updateAnalysisOptions() {
+            const type = document.getElementById('analysis-type').value;
+            
+            // Hide all conditional options
+            document.getElementById('subgroup-size-group').style.display = 'none';
+            document.getElementById('chart-type-group').style.display = 'none';
+            document.getElementById('regression-inputs').style.display = 'none';
+            document.getElementById('spec-limits-group').style.display = 'none';
+            
+            // Show relevant options
+            if (type === 'spc') {
+                document.getElementById('subgroup-size-group').style.display = 'block';
+            } else if (type === 'assess') {
+                document.getElementById('chart-type-group').style.display = 'block';
+            } else if (type === 'regression') {
+                document.getElementById('regression-inputs').style.display = 'block';
+            } else if (type === 'report' || type === 'capability') {
+                document.getElementById('spec-limits-group').style.display = 'block';
             }
         }
-
-        document.getElementById('analysis-type').addEventListener('change', (e) => {
-            if (e.target.value === 'report') {
-                document.getElementById('spec-limits').style.display = 'block';
-            } else {
-                document.getElementById('spec-limits').style.display = 'none';
-            }
-            
-            if (e.target.value === 'spc') {
-                document.getElementById('subgroup-size-group').style.display = 'block';
-            } else {
-                document.getElementById('subgroup-size-group').style.display = 'none';
-            }
-        });
-
-        function runAnalysis() {
+        
+        async function runAnalysis() {
             if (!selectedColumn) {
                 alert('请先选择一个数据列');
                 return;
@@ -189,69 +588,177 @@
             const data = {
                 filename: currentFilename,
                 column: selectedColumn,
-                type: document.getElementById('analysis-type').value,
-                lsl: parseFloat(document.getElementById('lsl').value) || null,
-                usl: parseFloat(document.getElementById('usl').value) || null,
-                subgroup_size: parseInt(document.getElementById('subgroup-size').value) || 5
+                type: document.getElementById('analysis-type').value
             };
             
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('results').style.display = 'none';
-            document.getElementById('error-container').innerHTML = '';
-            
-            fetch('/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(result => {
-                document.getElementById('loading').style.display = 'none';
-                if (result.error) throw new Error(result.error);
-                
-                displayResults(result);
-            })
-            .catch(err => {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error-container').innerHTML = `
-                    <div class="card">
-                        <div class="error">分析失败: ${err.message}</div>
-                    </div>
-                `;
-            });
-        }
-
-        function displayResults(result) {
-            const container = document.getElementById('result-content');
-            
-            if (result.session) {
-                let html = `<p><strong>会话 ID:</strong> ${result.session}</p>`;
-                
-                if (result.files && result.files.length > 0) {
-                    html += '<h3>下载链接:</h3>';
-                    result.files.forEach(file => {
-                        const isPdf = file.name.endsWith('.pdf');
-                        html += `<a href="${file.url}" class="download-link" download>
-                                    ${isPdf ? '📄' : '🖼️'} ${file.name}
-                                 </a>`;
-                    });
-                    html += '<p><small>PDF报告包含所有图表和统计数据</small></p>';
-                }
-                
-                if (result.result) {
-                    html += '<h3>统计摘要:</h3><div class="result-item">';
-                    for (const [key, value] of Object.entries(result.result)) {
-                        html += `<strong>${key}:</strong> ${value}<br>`;
-                    }
-                    html += '</div>';
-                }
-                
-                container.innerHTML = html;
-            } else {
-                container.innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            // Add optional parameters
+            const chartType = document.getElementById('chart-type');
+            if (chartType && chartType.value) {
+                data.chart_type = chartType.value;
             }
             
+            const xInput = document.getElementById('regression-x');
+            const yInput = document.getElementById('regression-y');
+            if (xInput.value && yInput.value) {
+                data.x = xInput.value;
+                data.y = yInput.value;
+            }
+            
+            const lsl = document.getElementById('lsl');
+            const usl = document.getElementById('usl');
+            if (lsl.value) data.lsl = parseFloat(lsl.value);
+            if (usl.value) data.usl = parseFloat(usl.value);
+            
+            const subgroupSize = document.getElementById('subgroup-size');
+            if (subgroupSize && subgroupSize.value) {
+                data.subgroup_size = parseInt(subgroupSize.value);
+            }
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('analyze-btn').disabled = true;
+            document.getElementById('analyze-btn').innerHTML = '<i class="bi bi-hourglass-split"></i> 处理中...';
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                displayResults(result);
+                
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('analyze-btn').disabled = false;
+                document.getElementById('analyze-btn').innerHTML = '<i class="bi bi-play-circle"></i> 生成分析';
+            }
+        }
+        
+        function displayResults(result) {
+            const container = document.getElementById('result-content');
+            container.innerHTML = '';
+            
+            // Session ID
+            if (result.session) {
+                container.innerHTML += `
+                    <div class="alert alert-info alert-custom mb-3">
+                        <i class="bi bi-key"></i> <strong>会话 ID:</strong> ${result.session}
+                    </div>
+                `;
+            }
+            
+            // Text results (insights + stemleaf)
+            if (result.text) {
+                container.innerHTML += `
+                    <div class="result-section">
+                        <h4><i class="bi bi-lightbulb"></i> 智能分析报告</h4>
+                        <div class="result-text">${escapeHtml(result.text)}</div>
+                    </div>
+                `;
+            }
+            
+            // Statistics summary
+            if (result.result && Object.keys(result.result).length > 0) {
+                let statsHtml = '<div class="result-section"><h4><i class="bi bi-bar-chart"></i> 统计摘要</h4><div class="stats-grid">';
+                const labels = {
+                    count: '样本数',
+                    mean: '平均值',
+                    std: '标准差',
+                    min: '最小值',
+                    max: '最大值',
+                    cv: '变异系数'
+                };
+                for (const [key, value] of Object.entries(result.result)) {
+                    const label = labels[key] || key;
+                    const displayValue = typeof value === 'number' ? 
+                        (key === 'cv' ? `${(value*100).toFixed(2)}%` : value.toFixed(4)) : 
+                        value;
+                    statsHtml += `
+                        <div class="stat-card">
+                            <div class="stat-value">${displayValue}</div>
+                            <div class="stat-label">${label}</div>
+                        </div>
+                    `;
+                }
+                statsHtml += '</div></div>';
+                container.innerHTML += statsHtml;
+            }
+            
+            // Files (images/PDFs)
+            if (result.files && result.files.length > 0) {
+                let filesHtml = '<div class="result-section"><h4><i class="bi bi-images"></i> 可视化图表</h4>';
+                result.files.forEach(file => {
+                    const url = file.url;
+                    const isPdf = file.name.endsWith('.pdf');
+                    const chartName = file.name.replace(/^assess_|^spc_|^regression_|^capability_|^heatmap_/, '').replace('.png', '').replace('.pdf', '');
+                    
+                    filesHtml += `
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0"><span class="badge-chart">${chartName}</span> ${file.name}</h5>
+                                <a href="${url}" target="_blank" class="btn btn-sm btn-outline-primary" download>
+                                    <i class="bi bi-download"></i> 下载
+                                </a>
+                            </div>
+                    `;
+                    
+                    if (isPdf) {
+                        filesHtml += `
+                            <iframe class="result-pdf" src="${url}" frameborder="0">
+                                您的浏览器不支持 iframe，请 <a href="${url}" target="_blank">点击下载</a> 查看。
+                            </iframe>
+                        `;
+                    } else {
+                        filesHtml += `
+                            <img src="${url}" class="result-image" alt="${file.name}" loading="lazy">
+                        `;
+                    }
+                    
+                    filesHtml += '</div>';
+                });
+                filesHtml += '</div>';
+                container.innerHTML += filesHtml;
+            }
+            
+            // Success message
+            if (result.message) {
+                container.innerHTML += `
+                    <div class="alert alert-success alert-custom">
+                        <i class="bi bi-check-circle-fill"></i> ${result.message}
+                    </div>
+                `;
+            }
+            
+            // Ensure results visible
             document.getElementById('results').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('error-container');
+            container.innerHTML = `
+                <div class="alert alert-error-custom">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <strong>错误:</strong> ${message}
+                </div>
+            `;
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>

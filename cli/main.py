@@ -21,7 +21,8 @@ from core.assessment import AssessmentCharts
 from core.heatmap import HeatmapGenerator
 from core.regression import RegressionAnalysis
 from core.capability import ProcessCapability
-from core.report import PDFReport, create_quality_report
+from core.report import create_quality_report
+from core.insights import InsightGenerator
 
 
 @click.group()
@@ -42,7 +43,8 @@ def cli():
 def stats(file: str, column: str, output: str):
     """基础描述性统计"""
     try:
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, comment='#')
+        df.columns = df.columns.str.strip()
         if column not in df.columns:
             click.echo(f"错误: 列 '{column}' 不存在", err=True)
             click.echo(f"可用列: {', '.join(df.columns)}", err=True)
@@ -85,7 +87,8 @@ def stats(file: str, column: str, output: str):
 def spc(file: str, column: str, subgroup_size: int, output_dir: str):
     """生成 SPC 控制图 (X-R)"""
     try:
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, comment='#')
+        df.columns = df.columns.str.strip()
         if column not in df.columns:
             click.echo(f"错误: 列 '{column}' 不存在", err=True)
             sys.exit(1)
@@ -141,18 +144,28 @@ def spc(file: str, column: str, subgroup_size: int, output_dir: str):
 @click.option('--file', '-f', required=True, type=click.Path(exists=True), help='数据文件 (CSV)')
 @click.option('--column', '-c', required=True, help='数据列名')
 @click.option('--type', '-t', 'chart_type', required=True, 
-              type=click.Choice(['histogram', 'boxplot', 'qqplot', 'stemleaf'], case_sensitive=False),
+              type=click.Choice(['histogram', 'boxplot', 'qqplot', 'stemleaf', 'timeseries', 'pareto'], case_sensitive=False),
               help='图表类型')
 @click.option('--output', '-o', default=None, help='输出文件 (PNG/文本)')
 def assess(file: str, column: str, chart_type: str, output: str):
     """生成评估图 (直方图/箱线图/QQ图/茎叶图)"""
     try:
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, comment='#')
+        df.columns = df.columns.str.strip()
         if column not in df.columns:
             click.echo(f"错误: 列 '{column}' 不存在", err=True)
             sys.exit(1)
             
         data = df[column].dropna().tolist()
+        
+        # 图表类型映射
+        chart_funcs = {
+            'histogram': AssessmentCharts.histogram,
+            'boxplot': AssessmentCharts.boxplot,
+            'qqplot': AssessmentCharts.qqplot,
+            'timeseries': AssessmentCharts.timeseries,
+            'pareto': AssessmentCharts.pareto
+        }
         
         if chart_type == 'stemleaf':
             # 茎叶图是文本输出
@@ -163,22 +176,31 @@ def assess(file: str, column: str, chart_type: str, output: str):
                     f.write(result)
                 click.echo(f"\n已保存: {output}")
             return
-            
-        # 图表类型映射
-        chart_funcs = {
-            'histogram': AssessmentCharts.histogram,
-            'boxplot': AssessmentCharts.boxplot,
-            'qqplot': AssessmentCharts.qqplot
-        }
         
+        # 生成图表
         func = chart_funcs[chart_type]
         fig = func(data, title=f"{chart_type.title()} - {column}")
         
+        # 保存或显示图表
         if output:
             fig.savefig(output, dpi=300, bbox_inches='tight')
             click.echo(f"图表已保存: {output}")
         else:
             plt.show()
+            
+        # 输出洞察分析
+        click.echo("\n" + "="*60)
+        click.echo("📊 数据洞察:")
+        insight = InsightGenerator.assess_insight(data, column, chart_type)
+        click.echo(insight.summary)
+        click.echo("\n关键发现:")
+        for h in insight.highlights:
+            click.echo(f"  • {h}")
+        if insight.recommendations:
+            click.echo("\n建议:")
+            for r in insight.recommendations:
+                click.echo(f"  🔧 {r}")
+        click.echo("="*60)
             
     except Exception as e:
         click.echo(f"错误: {e}", err=True)
@@ -194,7 +216,8 @@ def assess(file: str, column: str, chart_type: str, output: str):
 def heatmap(file: str, method: str, output: str):
     """生成热力图 (相关性矩阵)"""
     try:
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, comment='#')
+        df.columns = df.columns.str.strip()
         corr_matrix = HeatmapGenerator.correlation(df, method=method)
         
         click.echo(f"\n=== 热力图 (相关系数矩阵) ===")
@@ -227,7 +250,8 @@ def heatmap(file: str, method: str, output: str):
 def regression(file: str, x: str, y: str, output_dir: str):
     """回归分析 (方程分析)"""
     try:
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, comment='#')
+        df.columns = df.columns.str.strip()
         for col in [x, y]:
             if col not in df.columns:
                 click.echo(f"错误: 列 '{col}' 不存在", err=True)
@@ -272,7 +296,8 @@ def regression(file: str, x: str, y: str, output_dir: str):
 def capability(file: str, column: str, lsl: Optional[float], usl: Optional[float], output_dir: str):
     """过程能力分析 (Cp/Cpk)"""
     try:
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, comment='#')
+        df.columns = df.columns.str.strip()
         if column not in df.columns:
             click.echo(f"错误: 列 '{column}' 不存在", err=True)
             sys.exit(1)
@@ -326,7 +351,8 @@ def report(file: str, column: str, lsl: Optional[float], usl: Optional[float],
            subgroup_size: int, output_dir: str, pdf_name: str):
     """生成完整的质量统计报告 (PNG图表 + PDF文档)"""
     try:
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, comment='#')
+        df.columns = df.columns.str.strip()
         if column not in df.columns:
             click.echo(f"错误: 列 '{column}' 不存在", err=True)
             sys.exit(1)
