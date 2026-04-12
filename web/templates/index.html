@@ -8,117 +8,86 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Theme CSS -->
+    <link href="{{ url_for('static', filename='css/industrial-theme.css') }}" rel="stylesheet">
     <style>
+        /* 保持现有样式, 覆盖主要颜色 */
         :root {
-            --primary-gradient: linear-gradient(135deg, #0066cc, #00aaff);
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --info-color: #3b82f6;
+            --primary: #0052cc;
+            --primary-hover: #0747a6;
         }
         
         body {
-            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
-            min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg-body);
+            font-family: var(--font-sans);
         }
         
         .main-header {
-            background: var(--primary-gradient);
-            color: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 102, 204, 0.2);
-            margin-bottom: 2rem;
+            background: var(--primary);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: var(--space-xl);
             overflow: hidden;
         }
         
         .main-header .header-content {
-            padding: 2.5rem;
+            padding: var(--space-xl);
             text-align: center;
         }
         
         .main-header h1 {
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+            font-size: 2.25rem;
         }
         
         .main-header .subtitle {
             opacity: 0.9;
             font-size: 1.1rem;
+            color: var(--gray-600);
         }
-        
-        .card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-        
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 600;
-            padding: 1rem 1.5rem;
-            border: none;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-        }
-        
+    </style>
+    <style>
         .file-upload-area {
-            border: 3px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 3rem 1.5rem;
+            border: 3px dashed var(--gray-300);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2xl) var(--space-lg);
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.5);
+            transition: all var(--transition-base);
+            background: var(--gray-50);
         }
         
-        .file-upload-area:hover {
-            border-color: #0066cc;
-            background: rgba(0, 102, 204, 0.05);
+        .file-upload-area:hover,
+        .file-upload-area.drag-over {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: scale(1.005);
         }
         
         .file-upload-area i {
             font-size: 3rem;
-            color: #0066cc;
-            margin-bottom: 1rem;
+            color: var(--primary);
+            margin-bottom: var(--space-lg);
+        }
+        .file-upload-area h4 {
+            color: var(--gray-700);
+            margin-bottom: var(--space-sm);
+        }
+        .file-upload-area p {
+            color: var(--gray-500);
+            margin-bottom: 0;
         }
         
         .column-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            margin: 0.25rem;
-            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-            border: 2px solid transparent;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
+            composes: tag from industrial-theme.css;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            padding: var(--space-sm) var(--space-md);
         }
-        
-        .column-tag:hover {
-            border-color: #0066cc;
-            transform: scale(1.05);
-        }
-        
         .column-tag.selected {
-            background: var(--primary-gradient);
-            color: white;
-            border-color: #0066cc;
+            background: var(--primary);
+            border-color: var(--primary);
         }
         
         .column-tag i {
@@ -126,43 +95,31 @@
         }
         
         .form-label {
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
+            composes: form-label from industrial-theme.css;
+            margin-bottom: var(--space-sm);
         }
         
         .form-select, .form-control {
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 0.75rem 1rem;
+            composes: form-control from industrial-theme.css;
+            border-radius: var(--radius-md);
+            padding: var(--space-md) var(--space-lg);
             font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: var(--transition-fast);
         }
-        
         .form-select:focus, .form-control:focus {
-            border-color: #0066cc;
-            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
         
         .btn-primary {
-            background: var(--primary-gradient);
-            border: none;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-            border-radius: 10px;
+            composes: btn-primary from industrial-theme.css;
             font-size: 1.1rem;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
         }
-        
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
         }
-        
         .btn-primary:disabled {
-            background: #9ca3af;
+            background: var(--gray-400);
             cursor: not-allowed;
             transform: none;
         }
@@ -177,44 +134,32 @@
         }
         
         .result-section {
-            background: #f8fafc;
-            border-left: 4px solid #0066cc;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-radius: 8px;
+            composes: result-section from industrial-theme.css;
         }
         
         .result-image {
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 1rem;
+            composes: result-image from industrial-theme.css;
         }
-        
         .result-pdf {
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            min-height: 800px;
-            margin-bottom: 1rem;
+            composes: result-pdf from industrial-theme.css;
         }
-        
         .result-text {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 1.5rem;
-            border-radius: 8px;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-            font-size: 0.9rem;
+            background: var(--gray-800);
+            color: var(--gray-300);
+            padding: var(--space-lg);
+            border-radius: var(--radius-md);
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
             line-height: 1.6;
             overflow-x: auto;
         }
         
         .badge-chart {
-            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            composes: badge from industrial-theme.css;
+            background: var(--primary);
             color: white;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-sm);
             font-size: 0.85rem;
         }
         
@@ -227,8 +172,8 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 5px solid #e5e7eb;
-            border-top: 5px solid #0066cc;
+            border: 5px solid var(--gray-200);
+            border-top: 5px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
@@ -242,86 +187,97 @@
         }
         
         .alert-success-custom {
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-            color: #065f46;
+            background: var(--success-light);
+            color: var(--success);
         }
-        
         .alert-error-custom {
-            background: linear-gradient(135deg, #fee2e2, #fecaca);
-            color: #991b1b;
+            background: var(--danger-light);
+            color: var(--danger);
         }
         
         .section-title {
+            composes: h3 from industrial-theme.css;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 1.5rem;
+            gap: var(--space-md);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: var(--space-lg);
         }
-        
         .section-title i {
-            color: #0066cc;
+            color: var(--primary);
         }
-        
         .file-info-box {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            border: 2px solid #bae6fd;
-            border-radius: 10px;
-            padding: 1rem 1.5rem;
-            margin-top: 1rem;
+            composes: result-section from industrial-theme.css;
+            background: var(--primary-light);
+            border: 1px solid var(--primary);
+            border-left-width: 4px;
+            margin-top: var(--space-md);
         }
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
         }
-        
         .stat-card {
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
             text-align: center;
-            transition: border-color 0.2s;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
         }
-        
         .stat-card:hover {
-            border-color: #0066cc;
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
         }
-        
         .stat-value {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #0066cc;
+            color: var(--primary);
+            font-family: var(--font-mono);
         }
-        
         .stat-label {
-            font-size: 0.85rem;
-            color: #6b7280;
-            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: var(--space-xs);
         }
         
         @media (max-width: 768px) {
             .main-header .header-content {
-                padding: 1.5rem;
+                padding: var(--space-lg);
             }
-            
             .main-header h1 {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
             }
-            
-            .container {
-                padding: 1rem;
+            .container-industrial {
+                padding-left: var(--space-md);
+                padding-right: var(--space-md);
             }
         }
     </style>
 </head>
 <body>
-    <div class="container py-4">
+    <div class="container-industrial py-4">
+        <!-- 主导航栏 -->
+        <nav class="main-nav">
+            <div class="nav-brand">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>工业质量统计</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="upload"><i class="bi bi-cloud-arrow-up"></i> 数据上传</li>
+                <li class="nav-item" data-page="analysis"><i class="bi bi-sliders"></i> 分析工作台</li>
+                <li class="nav-item" data-page="reports"><i class="bi bi-file-earmark-check"></i> 报告中心</li>
+                <li class="nav-item" data-page="settings"><i class="bi bi-gear"></i> 设置</li>
+            </ul>
+        </nav>
+        
+        <!-- 页面内容区域 -->
+        <div id="page-upload" class="page-content">
         <!-- Header -->
         <div class="main-header">
             <div class="header-content">
@@ -451,6 +407,41 @@
 
         <!-- Error Container -->
         <div id="error-container"></div>
+        </div> <!-- 结束 page-upload -->
+        
+        <!-- 其他页面 (占位) -->
+        <div id="page-analysis" class="page-content" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-sliders"></i> 分析工作台 (开发中)
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">此功能正在开发中，敬请期待...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="page-reports" class="page-content" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-file-earmark-check"></i> 报告中心 (开发中)
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">历史报告下载与管理功能即将上线。</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="page-settings" class="page-content" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-gear"></i> 设置 (开发中)
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">系统配置页面正在建设中。</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Bootstrap JS -->
@@ -460,25 +451,53 @@
         let selectedColumn = null;
         let currentFilename = null;
         
+        // === 导航切换 ===
+        function switchPage(pageName) {
+            // 更新导航项状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-page') === pageName) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // 显示对应页面（这里简单隐藏所有页面并显示目标）
+            const pages = ['upload', 'analysis', 'reports', 'settings'];
+            pages.forEach(p => {
+                const el = document.getElementById('page-' + p);
+                if (el) el.style.display = (p === pageName) ? 'block' : 'none';
+            });
+        }
+        
+        // 导航项点击事件绑定
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const page = item.getAttribute('data-page');
+                    if (page) switchPage(page);
+                });
+            });
+        });
+        
         // Drag and drop support
         const dropZone = document.getElementById('drop-zone');
         
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropZone.style.borderColor = '#0066cc';
-            dropZone.style.background = 'rgba(0, 102, 204, 0.1)';
+            dropZone.style.borderColor = 'var(--primary)';
+            dropZone.style.background = 'var(--primary-light)';
         });
         
         dropZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
-            dropZone.style.borderColor = '#cbd5e1';
-            dropZone.style.background = 'rgba(255, 255, 255, 0.5)';
+            dropZone.style.borderColor = 'var(--gray-300)';
+            dropZone.style.background = 'var(--gray-50)';
         });
         
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropZone.style.borderColor = '#cbd5e1';
-            dropZone.style.background = 'rgba(255, 255, 255, 0.5)';
+            dropZone.style.borderColor = 'var(--gray-300)';
+            dropZone.style.background = 'var(--gray-50)';
             
             const files = e.dataTransfer.files;
             if (files.length > 0) {

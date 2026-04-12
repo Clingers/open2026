@@ -16,7 +16,7 @@ matplotlib.use('Agg')
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 导入工具函数
-from utils import (
+from .utils import (
     standardize_error_response,
     run_subprocess_command,
     collect_output_files,
@@ -456,8 +456,8 @@ def handle_report(data, filepath, output_dir, session_id):
     if result.returncode != 0:
         raise RuntimeError(result.stderr)
     
-    # 收集文件（PNG + PDF）
-    files = collect_output_files(output_dir, ['.png', '.pdf'])
+    # 收集文件（仅 PDF，不包含单独图表）
+    files = collect_output_files(output_dir, ['.pdf'])
     
     # 生成综合洞察
     df = load_dataframe(filepath)

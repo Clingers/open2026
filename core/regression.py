@@ -1,6 +1,9 @@
 # 工业质量统计 - 回归分析与方程分析
 # 2026-03-26
 
+# 确保中文字体配置
+from . import font_config  # noqa
+
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -82,16 +85,16 @@ class RegressionAnalysis:
         
         # 1. 散点图 + 回归线
         ax1 = axes[0, 0]
-        ax1.scatter(x_arr, y_arr, alpha=0.6, color='blue', label='数据点')
+        ax1.scatter(x_arr, y_arr, alpha=0.6, color='blue', label='Data points')
         
-        # 回归线
+        # Regression line
         x_line = np.linspace(min(x_arr), max(x_arr), 100)
         y_line = results["intercept"] + results["slope"] * x_line
-        ax1.plot(x_line, y_line, 'r-', linewidth=2, label='回归线')
+        ax1.plot(x_line, y_line, 'r-', linewidth=2, label='Regression line')
         
         ax1.set_xlabel(kwargs.get("xlabel", "X"))
         ax1.set_ylabel(kwargs.get("ylabel", "Y"))
-        ax1.set_title("回归拟合", fontsize=12, pad=10)
+        ax1.set_title("Regression Fit", fontsize=12, pad=10)
         ax1.legend()
         ax1.grid(True, alpha=0.3)
         
@@ -101,22 +104,22 @@ class RegressionAnalysis:
         ax2.scatter(x_arr, residuals, alpha=0.6, color='green')
         ax2.axhline(y=0, color='red', linestyle='--', linewidth=2)
         ax2.set_xlabel(kwargs.get("xlabel", "X"))
-        ax2.set_ylabel("残差")
-        ax2.set_title("残差图", fontsize=12, pad=10)
+        ax2.set_ylabel("Residuals")
+        ax2.set_title("Residuals Plot", fontsize=12, pad=10)
         ax2.grid(True, alpha=0.3)
         
         # 3. 残差直方图
         ax3 = axes[1, 0]
         ax3.hist(residuals, bins=15, density=True, alpha=0.7, color='orange')
-        ax3.set_xlabel("残差")
-        ax3.set_ylabel("密度")
-        ax3.set_title("残差分布", fontsize=12, pad=10)
+        ax3.set_xlabel("Residuals")
+        ax3.set_ylabel("Density")
+        ax3.set_title("Residual Distribution", fontsize=12, pad=10)
         ax3.grid(True, alpha=0.3)
         
         # 4. QQ图 (残差正态性)
         ax4 = axes[1, 1]
         stats.probplot(residuals, dist="norm", plot=ax4)
-        ax4.set_title("残差QQ图", fontsize=12, pad=10)
+        ax4.set_title("Residual Q-Q Plot", fontsize=12, pad=10)
         ax4.grid(True, alpha=0.3)
         
         # 添加统计文本框
@@ -128,7 +131,7 @@ class RegressionAnalysis:
         fig.text(0.02, 0.02, stats_text, fontsize=9,
                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
         
-        plt.suptitle(kwargs.get("title", "回归分析报告"), fontsize=16, y=1.02)
+        plt.suptitle(kwargs.get("title", "Regression Analysis Report"), fontsize=16, y=1.02)
         plt.tight_layout()
         return fig
 

@@ -1,6 +1,9 @@
 # 工业质量统计 - 智能分析引擎
 # 2026-03-26
 
+# 确保中文字体配置
+from . import font_config  # noqa
+
 import numpy as np
 from scipy import stats
 from typing import List, Dict, Any, Optional
@@ -35,10 +38,10 @@ class InsightGenerator:
         if n <= 5000:
             _, p_normal = stats.shapiro(data)
             if p_normal > 0.05:
-                highlights.append(f"✅ 数据符合正态分布 (p={p_normal:.4f})")
+                highlights.append(f"✅ Data is normally distributed (p={p_normal:.4f})")
             else:
-                highlights.append(f"⚠️  数据偏离正态分布 (p={p_normal:.4f})")
-                recommendations.append("考虑数据转换或使用非参数方法")
+                highlights.append(f"⚠️  Data deviates from normality (p={p_normal:.4f})")
+                recommendations.append("Consider data transformation or non-parametric methods")
         
         # 异常值检测
         q1 = np.percentile(data, 25)
@@ -49,30 +52,30 @@ class InsightGenerator:
         outliers = data[(data < lower) | (data > upper)]
         
         if len(outliers) > 0:
-            highlights.append(f"⚠️  检测到 {len(outliers)} 个异常值 (IQR方法)")
-            recommendations.append("建议调查异常原因并考虑剔除或修正")
+            highlights.append(f"⚠️  Detected {len(outliers)} outliers (IQR method)")
+            recommendations.append("Investigate root cause and consider removal or correction")
         else:
-            highlights.append("✅ 未发现明显异常值")
+            highlights.append("✅ No evident outliers")
         
         # 变异系数评估
         cv = std / mean if mean != 0 else 0
         if cv < 0.03:
-            variation = "过程非常稳定"
+            variation = "Very stable process"
         elif cv < 0.06:
-            variation = "过程稳定"
+            variation = "Stable process"
         elif cv < 0.10:
-            variation = "过程略有波动"
+            variation = "Slight variation"
         else:
-            variation = "过程波动较大，需关注"
-        highlights.append(f"变异系数 (CV): {cv:.2%} - {variation}")
+            variation = "High variation - needs attention"
+        highlights.append(f"Coefficient of Variation (CV): {cv:.2%} - {variation}")
         
-        summary = f"{column} 数据评估完成 (n={n})。平均值={mean:.4f}，标准差={std:.4f}。{variation}。"
+        summary = f"{column} data assessment completed (n={n}). Mean={mean:.4f}, StdDev={std:.4f}. {variation}."
         
         return AnalysisInsight(
             summary=summary,
             highlights=highlights,
             recommendations=recommendations,
-            stability="稳定" if cv < 0.06 else "需关注"
+            stability="Stable" if cv < 0.06 else "Needs attention"
         )
     
     @staticmethod
@@ -94,20 +97,20 @@ class InsightGenerator:
         r_outliers = sum(1 for r in subgroup_ranges if r > ucl_r)
         
         if x_outliers == 0 and r_outliers == 0:
-            highlights.append("✅ 过程处于统计受控状态")
-            stability = "受控"
+            highlights.append("✅ Process in statistical control")
+            stability = "In control"
         else:
-            highlights.append(f"⚠️  过程存在异常：X-bar异常点{x_outliers}个，R图异常点{r_outliers}个")
-            recommendations.append("检查特殊原因变异，找出失控点")
-            stability = "失控"
+            highlights.append(f"⚠️  Process out of control: {x_outliers} X-bar outliers, {r_outliers} R chart outliers")
+            recommendations.append("Investigate special causes and identify out-of-control points")
+            stability = "Out of control"
         
         # 控制限宽度评估
         process_width = ucl_x - lcl_x
         if process_width > 0:
             cv_process = (r_bar / x_bar) * 100 if x_bar != 0 else 0
-            highlights.append(f"过程变异系数: {cv_process:.1f}%")
+            highlights.append(f"Process Variation Coefficient: {cv_process:.1f}%")
         
-        summary = f"SPC控制图分析完成。X̄={x_bar:.4f}, R̄={r_bar:.4f}。控制限: X̄ [{lcl_x:.4f}, {ucl_x:.4f}], R [{lcl_r:.4f}, {ucl_r:.4f}]。"
+        summary = f"SPC control chart analysis completed. X̄={x_bar:.4f}, R̄={r_bar:.4f}. Control limits: X̄ [{lcl_x:.4f}, {ucl_x:.4f}], R [{lcl_r:.4f}, {ucl_r:.4f}]."
         
         return AnalysisInsight(
             summary=summary,
@@ -128,36 +131,36 @@ class InsightGenerator:
         highlights = []
         recommendations = []
         
-        # R²评估
+        # R² evaluation
         if r_squared >= 0.7:
-            fit = "优秀"
+            fit = "Excellent"
         elif r_squared >= 0.5:
-            fit = "良好"
+            fit = "Good"
         elif r_squared >= 0.3:
-            fit = "一般"
+            fit = "Fair"
         else:
-            fit = "较弱"
-        highlights.append(f"模型拟合度 (R²): {r_squared:.4f} - {fit}")
+            fit = "Weak"
+        highlights.append(f"Model Fit (R²): {r_squared:.4f} - {fit}")
         
-        # 斜率显著性
+        # Slope significance
         if slope_p < 0.05:
-            sig = "显著"
-            direction = "正相关" if slope > 0 else "负相关"
-            highlights.append(f"✅ 斜率{direction}且统计显著 (p={slope_p:.4g})")
+            sig = "significant"
+            direction = "positive" if slope > 0 else "negative"
+            highlights.append(f"✅ Slope is {direction} and statistically significant (p={slope_p:.4g})")
         else:
-            sig = "不显著"
-            highlights.append(f"⚠️  斜率统计不显著 (p={slope_p:.4g})")
-            recommendations.append("考虑增加样本量或变换模型")
+            sig = "not significant"
+            highlights.append(f"⚠️  Slope is not statistically significant (p={slope_p:.4g})")
+            recommendations.append("Consider increasing sample size or transformation")
         
         # 方程
         equation = f"Y = {intercept:.4f} + {slope:.4f} * X"
-        summary = f"回归分析完成。方程: {equation}。R²={r_squared:.4f}，斜率{sig}。"
+        summary = f"Regression analysis completed. Equation: {equation}. R²={r_squared:.4f}, slope is {sig}."
         
         return AnalysisInsight(
             summary=summary,
             highlights=highlights,
             recommendations=recommendations,
-            trends=f"X每增加1单位，Y预计变化{slope:.4f}单位"
+            trends=f"For each 1-unit increase in X, Y changes by approximately {slope:.4f} units"
         )
     
     @staticmethod
@@ -169,49 +172,49 @@ class InsightGenerator:
         
         if lsl is None or usl is None:
             return AnalysisInsight(
-                summary="未提供规格限，无法进行过程能力评估。",
-                highlights=["请提供LSL和USL以计算Cp/Cpk"],
-                recommendations=["添加规格限重新分析"]
+                summary="Specification limits not provided. Process capability cannot be assessed.",
+                highlights=["Provide LSL and USL to calculate Cp/Cpk"],
+                recommendations=["Add specification limits and re-analyze"]
             )
         
         cp = capability_results.get('Cp', 0)
         cpk = capability_results.get('Cpk', 0)
         mean = np.mean(data)
         
-        # 评级
-        if cpk >= 1.67:
-            rating = "优秀"
-            highlights.append(f"✅ Cpk={cpk:.2f} - {rating} (过程能力充足)")
-            recommendations.append("保持当前过程，持续监控")
+        # Rating
+        if cpk >= 2.0:
+            rating = "Excellent"
+            highlights.append(f"✅ Cpk={cpk:.2f} - {rating} (Process capable)")
+            recommendations.append("Maintain current process, continue monitoring")
         elif cpk >= 1.33:
-            rating = "良好"
-            highlights.append(f"✅ Cpk={cpk:.2f} - {rating} (过程能力足够)")
-            recommendations.append("过程稳定，可适当放宽监控")
+            rating = "Good"
+            highlights.append(f"✅ Cpk={cpk:.2f} - {rating} (Adequately capable)")
+            recommendations.append("Process is stable, monitoring can be relaxed")
         elif cpk >= 1.00:
-            rating = "合格"
-            highlights.append(f"⚠️  Cpk={cpk:.2f} - {rating} (勉强合格)")
-            recommendations.append("需关注过程变异，考虑降低波动")
+            rating = "Marginal"
+            highlights.append(f"⚠️  Cpk={cpk:.2f} - {rating} (Acceptable but borderline)")
+            recommendations.append("Monitor process variation, consider reduction efforts")
         else:
-            rating = "不足"
-            highlights.append(f"❌ Cpk={cpk:.2f} - {rating} (需改进)")
-            recommendations.append("立即采取纠正措施，重新评估过程")
+            rating = "Inadequate"
+            highlights.append(f"❌ Cpk={cpk:.2f} - {rating} (Needs improvement)")
+            recommendations.append("Take immediate corrective actions, re-evaluate the process")
         
-        # 中心度检查
+        # Centering check
         target = (lsl + usl) / 2
         deviation = abs(mean - target)
         if deviation > (usl - lsl) * 0.1:
-            highlights.append(f"⚠️  均值偏离目标值 {deviation:.4f}")
-            recommendations.append("调整过程均值以接近目标值")
+            highlights.append(f"⚠️  Mean deviates from target by {deviation:.4f}")
+            recommendations.append("Adjust process mean to be closer to target")
         else:
-            highlights.append("✅ 均值接近目标值")
+            highlights.append("✅ Mean is close to target")
         
-        summary = f"过程能力分析完成。Cp={cp:.2f}, Cpk={cpk:.2f}，评级：{rating}。均值={mean:.4f}，规格限=[{lsl}, {usl}]。"
+        summary = f"Process capability analysis completed. Cp={cp:.2f}, Cpk={cpk:.2f}, Rating: {rating}. Mean={mean:.4f}, Spec Limits=[{lsl}, {usl}]."
         
         return AnalysisInsight(
             summary=summary,
             highlights=highlights,
             recommendations=recommendations,
-            stability="稳定" if cpk >= 1.33 else "不稳定"
+            stability="Stable" if cpk >= 1.33 else "Unstable"
         )
     
     @staticmethod

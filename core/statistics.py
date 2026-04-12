@@ -10,26 +10,26 @@ class DescriptiveStatistics:
     """描述性统计计算"""
     
     @staticmethod
-    def calculate(data: List[float], name: str = "数据") -> Dict:
+    def calculate(data: List[float], name: str = "Data") -> Dict:
         """计算完整描述性统计"""
         arr = np.array(data)
         return {
-            "名称": name,
-            "样本量": int(len(arr)),
-            "平均值": float(np.mean(arr)),
-            "中位数": float(np.median(arr)),
-            "众数": float(pd.Series(arr).mode()[0]) if len(pd.Series(arr).mode()) > 0 else None,
-            "标准差": float(np.std(arr, ddof=1)),
-            "方差": float(np.var(arr, ddof=1)),
-            "最小值": float(np.min(arr)),
-            "最大值": float(np.max(arr)),
-            "极差": float(np.ptp(arr)),
-            "变异系数": float(np.std(arr, ddof=1) / np.mean(arr)) if np.mean(arr) != 0 else None,
-            "偏度": float(pd.Series(arr).skew()),
-            "峰度": float(pd.Series(arr).kurtosis()),
-            "Q1": float(np.percentile(arr, 25)),
-            "Q3": float(np.percentile(arr, 75)),
-            "IQR": float(np.percentile(arr, 75) - np.percentile(arr, 25))
+            "name": name,
+            "sample_size": int(len(arr)),
+            "mean": float(np.mean(arr)),
+            "median": float(np.median(arr)),
+            "mode": float(pd.Series(arr).mode()[0]) if len(pd.Series(arr).mode()) > 0 else None,
+            "std": float(np.std(arr, ddof=1)),
+            "variance": float(np.var(arr, ddof=1)),
+            "min": float(np.min(arr)),
+            "max": float(np.max(arr)),
+            "range": float(np.ptp(arr)),
+            "cv": float(np.std(arr, ddof=1) / np.mean(arr)) if np.mean(arr) != 0 else None,
+            "skewness": float(pd.Series(arr).skew()),
+            "kurtosis": float(pd.Series(arr).kurtosis()),
+            "q1": float(np.percentile(arr, 25)),
+            "q3": float(np.percentile(arr, 75)),
+            "iqr": float(np.percentile(arr, 75) - np.percentile(arr, 25))
         }
     
     @staticmethod

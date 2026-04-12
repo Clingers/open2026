@@ -1,6 +1,9 @@
 # 工业质量统计 - 过程能力分析
 # 2026-03-26
 
+# 确保中文字体配置
+from . import font_config  # noqa
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
@@ -91,9 +94,9 @@ class ProcessCapability:
         ax.axvline(mean + 3*std, color='gray', linestyle=':', linewidth=1, alpha=0.7)
         ax.axvline(mean - 3*std, color='gray', linestyle=':', linewidth=1, alpha=0.7)
         
-        ax.set_xlabel(kwargs.get("xlabel", "测量值"))
-        ax.set_ylabel("密度")
-        ax.set_title(kwargs.get("title", "过程能力分析"), fontsize=14, pad=15)
+        ax.set_xlabel(kwargs.get("xlabel", "Measurement"))
+        ax.set_ylabel("Density")
+        ax.set_title(kwargs.get("title", "Process Capability Analysis"), fontsize=14, pad=15)
         ax.legend()
         ax.grid(True, alpha=0.3)
         

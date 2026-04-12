@@ -180,7 +180,7 @@ output:
 - [x] PDF报告生成
 - [x] 智能洞察引擎
 - [x] UI 美化 (响应式设计)
-- [ ] Docker 容器化
+- [x] Docker 容器化
 - [ ] 单元测试
 
 ---
@@ -328,6 +328,38 @@ python3 -m web.app --host 0.0.0.0 --port 5000
 
 # 4. 配置反向代理（Nginx）和系统服务（systemd）
 ```
+
+---
+
+### 方式3：Docker 部署（推荐）
+
+使用 Docker 快速部署，无需手动配置 Python 环境。
+
+```bash
+# 构建镜像
+docker-compose build
+
+# 启动服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+```
+
+访问：http://localhost:5000
+
+**Docker 配置说明**：
+- 使用 `python:3.11-slim` 基础镜像，预装中文字体
+- 自动安装所有 Python 依赖
+- 数据持久化：上传文件和输出结果保存到 Docker 卷
+- 健康检查：容器自动检测服务可用性
+- 重启策略：崩溃或重启时自动恢复
+
+**自定义配置**：
+编辑 `docker-compose.yml` 可修改端口、卷挂载等。
 
 ---
 

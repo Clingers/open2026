@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  industrial-quality-stats:
+    build: .
+    container_name: iqs-app
+    ports:
+      - "5000:5000"
+    volumes:
+      # 持久化上传文件和输出结果
+      - uploads_volume:/app/uploads
+      - output_volume:/app/web_output
+      # 可选：挂载数据目录以便动态添加CSV文件
+      # - ./data:/app/data
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=web.app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  uploads_volume:
+  output_volume:

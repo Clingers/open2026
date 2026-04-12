@@ -1,6 +1,9 @@
 # 工业质量统计 - SPC控制图模块
 # 2026-03-26
 
+# 确保中文字体配置
+from . import font_config  # noqa
+
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Dict, Tuple
@@ -101,8 +104,8 @@ class SPCControlChart:
         ax1.axhline(UCL_X, color='red', linestyle='--', linewidth=2, label=f'UCL={UCL_X:.2f}')
         ax1.axhline(LCL_X, color='red', linestyle='--', linewidth=2, label=f'LCL={LCL_X:.2f}')
         ax1.fill_between(range(len(x_bars)), LCL_X, UCL_X, alpha=0.1, color='green')
-        ax1.set_ylabel('X̄ 值')
-        ax1.set_title(f'X-R 控制图 (n={n})', fontsize=14, pad=15)
+        ax1.set_ylabel('X̄ Value')
+        ax1.set_title(f'X-R Control Chart (n={n})', fontsize=14, pad=15)
         ax1.legend(loc='upper right')
         ax1.grid(True, alpha=0.3)
         
@@ -112,8 +115,8 @@ class SPCControlChart:
         ax2.axhline(UCL_R, color='red', linestyle='--', linewidth=2, label=f'UCL={UCL_R:.2f}')
         ax2.axhline(LCL_R, color='red', linestyle='--', linewidth=2, label=f'LCL={LCL_R:.2f}')
         ax2.fill_between(range(len(ranges)), LCL_R, UCL_R, alpha=0.1, color='green')
-        ax2.set_xlabel('子组序号')
-        ax2.set_ylabel('极差 R')
+        ax2.set_xlabel('Subgroup Index')
+        ax2.set_ylabel('Range R')
         ax2.legend(loc='upper right')
         ax2.grid(True, alpha=0.3)
         

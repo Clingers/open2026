@@ -1,6 +1,9 @@
 # 工业质量统计 - 评估图模块
 # 2026-03-26
 
+# 确保中文字体配置
+from . import font_config  # noqa
+
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -13,8 +16,8 @@ class AssessmentCharts:
     """评估图表生成器 (Minitab风格)"""
     
     @staticmethod
-    def histogram(data: List[float], title: str = "直方图", **kwargs) -> plt.Figure:
-        """直方图 (带正态分布拟合)"""
+    def histogram(data: List[float], title: str = "Histogram", **kwargs) -> plt.Figure:
+        """Histogram (with normal distribution fit)"""
         fig, ax = plt.subplots(figsize=kwargs.get("figsize", (10, 6)))
         
         # 计算统计量
@@ -33,16 +36,16 @@ class AssessmentCharts:
             ax.plot(x, p, 'r--', linewidth=2, label=f'正态拟合 (μ={mean:.2f}, σ={std:.2f})')
             ax.legend()
         
-        ax.set_xlabel(kwargs.get("xlabel", "测量值"))
-        ax.set_ylabel(kwargs.get("ylabel", "频数" if not kwargs.get("density", True) else "密度"))
+        ax.set_xlabel(kwargs.get("xlabel", "Measurement"))
+        ax.set_ylabel(kwargs.get("ylabel", "Frequency" if not kwargs.get("density", True) else "Density"))
         ax.set_title(title, fontsize=14, pad=15)
         ax.grid(True, alpha=0.3)
         plt.tight_layout()
         return fig
     
     @staticmethod
-    def boxplot(data: List[float], title: str = "箱线图", **kwargs) -> plt.Figure:
-        """箱线图 (异常值检测)"""
+    def boxplot(data: List[float], title: str = "Boxplot", **kwargs) -> plt.Figure:
+        """Boxplot (Outlier Detection)"""
         fig, ax = plt.subplots(figsize=kwargs.get("figsize", (8, 6)))
         
         # 计算异常值
@@ -61,11 +64,11 @@ class AssessmentCharts:
         
         # 标注异常值
         if outliers and kwargs.get("show_outliers", True):
-            ax.text(1.05, upper, f'异常值: {len(outliers)}个', va='center', fontsize=9)
+            ax.text(1.05, upper, f'Outliers: {len(outliers)}', va='center', fontsize=9)
         
         ax.set_xticks([1])
-        ax.set_xticklabels([kwargs.get("label", "数据")])
-        ax.set_ylabel(kwargs.get("ylabel", "值"))
+        ax.set_xticklabels([kwargs.get("label", "Data")])
+        ax.set_ylabel(kwargs.get("ylabel", "Measurement"))
         ax.set_title(title, fontsize=14, pad=15)
         ax.grid(True, axis='y', alpha=0.3)
         
@@ -79,7 +82,7 @@ class AssessmentCharts:
         return fig
     
     @staticmethod
-    def qqplot(data: List[float], title: str = "QQ图 (正态性检验)", **kwargs) -> plt.Figure:
+    def qqplot(data: List[float], title: str = "Q-Q Plot (Normality Test)", **kwargs) -> plt.Figure:
         """QQ图 (Quantile-Quantile Plot)"""
         fig, ax = plt.subplots(figsize=kwargs.get("figsize", (8, 8)))
         
@@ -101,8 +104,8 @@ class AssessmentCharts:
         max_val = max(theoretical_quantiles.max(), sample_quantiles.max())
         ax.plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=2, label='参考线')
         
-        ax.set_xlabel("理论分位数 (正态分布)")
-        ax.set_ylabel("样本分位数")
+        ax.set_xlabel("Theoretical Quantiles (Normal Distribution)")
+        ax.set_ylabel("Sample Quantiles")
         ax.set_title(title, fontsize=14, pad=15)
         ax.legend()
         ax.grid(True, alpha=0.3)
@@ -118,7 +121,7 @@ class AssessmentCharts:
         return fig
     
     @staticmethod
-    def stem_leaf(data: List[float], title: str = "茎叶图") -> str:
+    def stem_leaf(data: List[float], title: str = "Stem-and-Leaf Plot") -> str:
         """茎叶图 (文本输出)"""
         # 数据排序
         sorted_data = sorted(data)
@@ -140,7 +143,7 @@ class AssessmentCharts:
         for stem in sorted(stems.keys()):
             leaves = sorted(stems[stem])
             leaves_str = " ".join(str(l) for l in leaves)
-            lines.append(f"{stem:>3} | {leaves_str}")
+            lines.append(f"{stem:>3} | {leaves_str}")  # Stem = {stem}, leaves = {leaves}
         
         return "\n".join(lines)
     
@@ -174,8 +177,8 @@ class AssessmentCharts:
             ax.scatter(outlier_x, outlier_y, color='red', s=100, zorder=5, 
                       marker='X', label=f'异常点 ({len(outliers)}个)')
         
-        ax.set_xlabel(kwargs.get("xlabel", "观测序号"))
-        ax.set_ylabel(kwargs.get("ylabel", "测量值"))
+        ax.set_xlabel(kwargs.get("xlabel", "Observation Index"))
+        ax.set_ylabel(kwargs.get("ylabel", "Measurement"))
         ax.set_title(title, fontsize=14, pad=15)
         ax.legend(loc='best')
         ax.grid(True, alpha=0.3)
@@ -190,11 +193,11 @@ class AssessmentCharts:
         return fig
     
     @staticmethod
-    def pareto(data: List[float], title: str = "帕累托图", **kwargs) -> plt.Figure:
-        """帕累托图 (频数分布分析)
+    def pareto(data: List[float], title: str = "Pareto Chart", **kwargs) -> plt.Figure:
+        """Pareto Chart (Frequency Distribution Analysis)
         
-        参数:
-            data: 可以是数值型频数，也可以是类别标签（自动统计频数）
+        Parameters:
+            data: Can be numeric frequencies or category labels (auto-count)
         """
         # 判断数据类型：如果看起来像类别（整数或字符串），则统计频数
         unique_vals = set(data)
@@ -207,9 +210,9 @@ class AssessmentCharts:
             values = list(counter.values())
             labels = list(counter.keys())
         else:
-            # 假设 data 已经是频数值，使用索引作为标签
+            # Assume data already contains frequencies, use index as label
             values = data
-            labels = [f"类别{i+1}" for i in range(len(data))]
+            labels = [f"Category {i+1}" for i in range(len(data))]
         
         # 排序：从大到小
         sorted_pairs = sorted(zip(values, labels), reverse=True)
@@ -225,8 +228,8 @@ class AssessmentCharts:
         bars = ax1.bar(range(len(vals)), vals, 
                        color=kwargs.get("color", "#1f77b4"), 
                        alpha=0.7, edgecolor='black')
-        ax1.set_xlabel(kwargs.get("xlabel", "类别"))
-        ax1.set_ylabel(kwargs.get("ylabel", "频数"))
+        ax1.set_xlabel(kwargs.get("xlabel", "Category"))
+        ax1.set_ylabel(kwargs.get("ylabel", "Frequency"))
         ax1.set_xticks(range(len(labs)))
         ax1.set_xticklabels(labs, rotation=45, ha='right')
         if vals:
@@ -235,18 +238,18 @@ class AssessmentCharts:
         # 累计百分比线
         ax2 = ax1.twinx()
         ax2.plot(range(len(vals)), cum_percent, color='red', marker='o', 
-                linewidth=2, markersize=6, label='累计百分比')
-        ax2.set_ylabel('累计百分比 (%)')
+                linewidth=2, markersize=6, label='Cumulative Percentage')
+        ax2.set_ylabel('Cumulative Percentage (%)')
         ax2.set_ylim(0, 110)
         
         # 80%线
-        ax2.axhline(80, color='orange', linestyle='--', linewidth=1.5, label='80%阈值')
+        ax2.axhline(80, color='orange', linestyle='--', linewidth=1.5, label='80% Threshold')
         
-        # 关键少数高亮
+        # Highlight vital few
         critical_indices = [i for i, cp in enumerate(cum_percent) if cp <= 80]
         if critical_indices:
             ax2.fill_between(critical_indices, 0, [cum_percent[i] for i in critical_indices], 
-                            alpha=0.3, color='orange', label='关键少数')
+                            alpha=0.3, color='orange', label='Vital Few')
         
         ax1.set_title(title, fontsize=14, pad=15)
         fig.legend(loc='upper left', bbox_to_anchor=(0.1, 0.9))

@@ -1,6 +1,9 @@
 # 工业质量统计 - 热力图模块
 # 2026-03-26
 
+# 确保中文字体配置
+from . import font_config  # noqa
+
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -50,7 +53,7 @@ class HeatmapGenerator:
         ax.set_xlabel(kwargs.get("xlabel", "X"))
         ax.set_ylabel(kwargs.get("ylabel", "Y"))
         ax.set_title(title, fontsize=14, pad=15)
-        fig.colorbar(hb, ax=ax, label="密度")
+        fig.colorbar(hb, ax=ax, label="Density")
         
         plt.tight_layout()
         return fig

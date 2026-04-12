@@ -1,6 +1,9 @@
 # 工业质量统计 - PDF 报告生成模块
 # 2026-03-26
 
+# 确保中文字体配置
+from . import font_config  # noqa
+
 import os
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -18,7 +21,7 @@ from reportlab.lib import colors
 class PDFReport:
     """PDF 报告生成器（类似 Minitab 的质量报告）"""
     
-    def __init__(self, output_path: str, title: str = "工业质量统计报告"):
+    def __init__(self, output_path: str, title: str = "Quality Statistics Report"):
         self.doc = SimpleDocTemplate(
             output_path, 
             pagesize=A4, 
@@ -59,22 +62,22 @@ class PDFReport:
         ))
     
     def add_title(self):
-        """添加报告标题"""
+        """Add report title"""
         self.story.append(Paragraph(self.title, self.styles['CustomTitle']))
         self.story.append(Spacer(1, 0.5*cm))
         
-        now = datetime.now().strftime("%Y年%m月%d日 %H:%M:%S")
-        meta = f"<b>生成时间:</b> {now}<br/><b>工具版本:</b> Industrial Quality Stats v1.0.0-MVP"
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        meta = f"<b>Generated:</b> {now}<br/><b>Version:</b> Industrial Quality Stats v1.0.0-MVP"
         self.story.append(Paragraph(meta, self.styles['NormalCN']))
         self.story.append(Spacer(1, 1*cm))
     
     def add_section(self, title: str):
-        """添加章节标题"""
+        """Add section title"""
         self.story.append(Paragraph(title, self.styles['SectionTitle']))
         self.story.append(Spacer(1, 0.3*cm))
     
     def add_text(self, text: str):
-        """添加文本"""
+        """Add text"""
         self.story.append(Paragraph(text, self.styles['NormalCN']))
     
     def add_table(self, data: List[List[str]], headers: Optional[List[str]] = None):
@@ -143,95 +146,91 @@ def create_quality_report(
     data_file: str,
     column_name: str
 ):
-    """创建完整的质量统计 PDF 报告"""
-    report = PDFReport(output_pdf, title=f"质量统计分析报告 - {column_name}")
+    """Create complete quality statistics PDF report"""
+    report = PDFReport(output_pdf, title=f"Quality Statistics Report - {column_name}")
     
     # 标题
     report.add_title()
     
-    # 数据信息
-    report.add_section("1. 数据信息")
-    report.add_text(f"<b>数据文件:</b> {data_file}")
-    report.add_text(f"<b>分析列:</b> {column_name}")
-    report.add_text(f"<b>样本量:</b> {stats_result.get('count', 'N/A')}")
+    # Data information
+    report.add_section("1. Data Information")
+    report.add_text(f"<b>Data File:</b> {data_file}")
+    report.add_text(f"<b>Analyzed Column:</b> {column_name}")
+    report.add_text(f"<b>Sample Size:</b> {stats_result.get('sample_size', 'N/A')}")
     
-    # 描述性统计
-    report.add_section("2. 描述性统计")
+    # Descriptive statistics
+    report.add_section("2. Descriptive Statistics")
     stat_table = [
-        ["统计量", "值"],
-        ["均值", f"{stats_result.get('mean', 0):.4f}"],
-        ["中位数", f"{stats_result.get('median', 0):.4f}"],
-        ["标准差", f"{stats_result.get('std', 0):.4f}"],
-        ["变异系数", f"{stats_result.get('cv', 0):.4f}%"],
-        ["最小值", f"{stats_result.get('min', 0):.4f}"],
-        ["最大值", f"{stats_result.get('max', 0):.4f}"],
-        ["极差", f"{stats_result.get('range', 0):.4f}"],
-        ["偏度", f"{stats_result.get('skewness', 0):.4f}"],
-        ["峰度", f"{stats_result.get('kurtosis', 0):.4f}"],
+        ["Statistic", "Value"],
+        ["Mean", f"{stats_result.get('mean', 0):.4f}"],
+        ["Median", f"{stats_result.get('median', 0):.4f}"],
+        ["Std Dev", f"{stats_result.get('std', 0):.4f}"],
+        ["CV", f"{stats_result.get('cv', 0):.4f}%"],
+        ["Min", f"{stats_result.get('min', 0):.4f}"],
+        ["Max", f"{stats_result.get('max', 0):.4f}"],
+        ["Range", f"{stats_result.get('range', 0):.4f}"],
+        ["Skewness", f"{stats_result.get('skewness', 0):.4f}"],
+        ["Kurtosis", f"{stats_result.get('kurtosis', 0):.4f}"],
     ]
     report.add_table(stat_table)
     
-    # 添加直方图
+    # Add histogram
     if 'histogram' in image_paths and os.path.exists(image_paths['histogram']):
-        report.add_section("3. 分布分析 - 直方图")
+        report.add_section("3. Distribution Analysis - Histogram")
         report.add_image(image_paths['histogram'])
     
-    # 添加箱线图
+    # Add boxplot
     if 'boxplot' in image_paths and os.path.exists(image_paths['boxplot']):
-        report.add_section("4. 分布分析 - 箱线图")
+        report.add_section("4. Distribution Analysis - Boxplot")
         report.add_image(image_paths['boxplot'])
     
-    # 添加QQ图
+    # Add Q-Q plot
     if 'qqplot' in image_paths and os.path.exists(image_paths['qqplot']):
-        report.add_section("5. 正态性检验 - QQ图")
+        report.add_section("5. Normality Test - Q-Q Plot")
         report.add_image(image_paths['qqplot'])
     
-    # SPC控制图
+    # SPC control chart
     if spc_result:
-        report.add_section("6. SPC 控制图")
+        report.add_section("6. SPC Control Chart")
         
-        # 控制限表格
+        # Control limits table
         spc_table = [
-            ["项目", "X̄", "R"],
-            ["中心线", f"{spc_result['X_bar']:.4f}", f"{spc_result['R_bar']:.4f}"],
-            ["上控制限", f"{spc_result['UCL_X']:.4f}", f"{spc_result['UCL_R']:.4f}"],
-            ["下控制限", f"{spc_result['LCL_X']:.4f}", f"{spc_result['LCL_R']:.4f}"],
+            ["Item", "X̄", "R"],
+            ["Center Line", f"{spc_result['X_bar']:.4f}", f"{spc_result['R_bar']:.4f}"],
+            ["UCL", f"{spc_result['UCL_X']:.4f}", f"{spc_result['UCL_R']:.4f}"],
+            ["LCL", f"{spc_result['LCL_X']:.4f}", f"{spc_result['LCL_R']:.4f}"],
         ]
         report.add_table(spc_table)
         
         if 'spc' in image_paths and os.path.exists(image_paths['spc']):
             report.add_image(image_paths['spc'])
     
-    # 过程能力分析
+    # Process capability analysis
     if capability_result:
-        report.add_section("7. 过程能力分析")
+        report.add_section("7. Process Capability Analysis")
         
-        # 如果有规格限，计算 Cp/Cpk
+        # Calculate Cp/Cpk if spec limits exist
         if 'Cp' in capability_result:
             cp_table = [
-                ["指标", "值"],
+                ["Metric", "Value"],
                 ["Cp", f"{capability_result['Cp']:.4f}"],
                 ["Cpk", f"{capability_result['Cpk']:.4f}"],
-                ["均值", f"{capability_result['mean']:.4f}"],
-                ["标准差", f"{capability_result['std']:.4f}"],
+                ["Mean", f"{capability_result['mean']:.4f}"],
+                ["Std Dev", f"{capability_result['std']:.4f}"],
             ]
             report.add_table(cp_table)
             
-            # 评级
+            # Rating
             if capability_result['Cpk'] >= 1.67:
-                rating = "优秀 (过程能力充足) - A级"
-                color = "绿色"
+                rating = "Excellent (Capable) - Grade A"
             elif capability_result['Cpk'] >= 1.33:
-                rating = "良好 (过程能力足够) - B级"
-                color = "蓝色"
+                rating = "Good (Adequate) - Grade B"
             elif capability_result['Cpk'] >= 1.00:
-                rating = "勉强合格 (需关注) - C级"
-                color = "黄色"
+                rating = "Marginal (Needs Attention) - Grade C"
             else:
-                rating = "不足 (需改进) - D级"
-                color = "红色"
+                rating = "Inadequate (Needs Improvement) - Grade D"
             
-            report.add_text(f"<b>评级:</b> {rating}")
+            report.add_text(f"<b>Rating:</b> {rating}")
             
             if 'capability' in image_paths and os.path.exists(image_paths['capability']):
                 report.add_image(image_paths['capability'])
