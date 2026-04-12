@@ -121,6 +121,14 @@ def analyze():
             return standardize_error_response(f'不支持的分析类型: {analysis_type}', 400)
         
         result = handlers[analysis_type](data, filepath, output_dir, session_id)
+        # 注入元数据，供前端图表使用
+        if '_meta' not in result:
+            result['_meta'] = {}
+        result['_meta'].update({
+            'filename': filename,
+            'column': column,
+            'analysis_type': analysis_type
+        })
         return jsonify(result)
         
     except ValueError as e:
@@ -525,6 +533,37 @@ def download_file(session_id, filename):
         return send_file(filepath, as_attachment=as_attachment)
     return jsonify({'error': '文件不存在'}), 404
 
+
+@app.route('/api/data')
+def get_data():
+    """获取原始数据列（用于前端图表）"""
+    filename = request.args.get('filename')
+    column = request.args.get('column')
+    if not filename or not column:
+        return jsonify({'error': '参数缺失: filename 和 column 必填'}), 400
+    
+    filepath = os.path.join(DATA_DIR, filename)
+    if not os.path.exists(filepath):
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if not os.path.exists(filepath):
+            return jsonify({'error': '文件不存在'}), 404
+    
+    try:
+        df = load_dataframe(filepath)
+        if column not in df.columns:
+            return jsonify({'error': f"列 '{column}' 不存在"}), 400
+        
+        # 清理 NaN 并返回列表
+        data = df[column].dropna().tolist()
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'column': column,
+            'data': data,
+            'count': len(data)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/templates/<path:path>')
 def send_template(path):
