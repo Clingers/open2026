@@ -10,6 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Custom Theme CSS -->
     <link href="{{ url_for('static', filename='css/industrial-theme.css') }}" rel="stylesheet">
+    <!-- Theme Upgrade (Dark Mode + ECharts) -->
+    <link href="{{ url_for('static', filename='css/industrial-theme-upgrade.css') }}" rel="stylesheet">
     <style>
         /* 保持现有样式, 覆盖主要颜色 */
         :root {
@@ -273,6 +275,7 @@
                 <li class="nav-item" data-page="analysis"><i class="bi bi-sliders"></i> 分析工作台</li>
                 <li class="nav-item" data-page="reports"><i class="bi bi-file-earmark-check"></i> 报告中心</li>
                 <li class="nav-item" data-page="settings"><i class="bi bi-gear"></i> 设置</li>
+                <li class="nav-item" id="theme-toggle"><i class="bi bi-moon"></i> 主题</li>
             </ul>
         </nav>
         
@@ -779,6 +782,40 @@
             div.textContent = text;
             return div.innerHTML;
         }
+        
+        // ============================================
+        // 主题切换 (Dark Mode)
+        // ============================================
+        (function() {
+            const THEME_KEY = 'industrial-theme';
+            const themeToggle = document.getElementById('theme-toggle');
+            
+            function applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                const icon = themeToggle.querySelector('i');
+                if (theme === 'dark') {
+                    icon.className = 'bi bi-sun';
+                    themeToggle.title = '切换到亮色模式';
+                } else {
+                    icon.className = 'bi bi-moon';
+                    themeToggle.title = '切换到暗色模式';
+                }
+                localStorage.setItem(THEME_KEY, theme);
+            }
+            
+            // 初始化：读取用户偏好或系统偏好
+            const savedTheme = localStorage.getItem(THEME_KEY);
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = savedTheme || (systemDark ? 'dark' : 'light');
+            applyTheme(initialTheme);
+            
+            // 绑定点击事件
+            themeToggle.addEventListener('click', function() {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const next = current === 'dark' ? 'light' : 'dark';
+                applyTheme(next);
+            });
+        })();
     </script>
 </body>
 </html>
