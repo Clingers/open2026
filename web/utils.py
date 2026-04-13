@@ -136,12 +136,28 @@ def generate_assess_insight(data: List[float], column: str, chart_type: str) -> 
 
 
 def generate_spc_insight(spc_data: Dict[str, Any]) -> str:
-    """生成 SPC 洞察文本"""
-    insight = InsightGenerator.spc_insight(
-        spc_data['subgroup_means'],
-        spc_data['subgroup_ranges'],
-        {k: spc_data[k] for k in ['X_bar', 'R_bar', 'UCL_X', 'LCL_X', 'UCL_R', 'LCL_R']}
-    )
+    """生成 SPC 洞察文本（支持 X-R, X-S, np）"""
+    # 必要参数
+    subgroup_means = spc_data.get('subgroup_means', [])
+    
+    # 构造可选参数
+    kwargs = {}
+    if 'subgroup_ranges' in spc_data:
+        kwargs['subgroup_ranges'] = spc_data['subgroup_ranges']
+    if 'subgroup_stds' in spc_data:
+        kwargs['subgroup_stds'] = spc_data['subgroup_stds']
+    
+    # 组装 chart_data (X-R 或 X-S 所需的参数)
+    chart_data_keys = [
+        'chart_type', 'subgroup_size',
+        'X_bar', 'R_bar', 'UCL_X', 'LCL_X', 'UCL_R', 'LCL_R',
+        'S_bar', 'UCL_S', 'LCL_S',
+        'np_bar', 'UCL', 'LCL'
+    ]
+    chart_data = {k: spc_data[k] for k in chart_data_keys if k in spc_data}
+    kwargs['chart_data'] = chart_data
+    
+    insight = InsightGenerator.spc_insight(subgroup_means, **kwargs)
     return format_insight_text("📈 SPC控制图分析", insight)
 
 

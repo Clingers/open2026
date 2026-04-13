@@ -79,38 +79,80 @@ class InsightGenerator:
         )
     
     @staticmethod
-    def spc_insight(subgroup_means: List[float], subgroup_ranges: List[float], 
-                   chart_data: Dict[str, float]) -> AnalysisInsight:
-        """SPC控制图分析洞察"""
-        x_bar = chart_data['X_bar']
-        r_bar = chart_data['R_bar']
-        ucl_x = chart_data['UCL_X']
-        lcl_x = chart_data['LCL_X']
-        ucl_r = chart_data['UCL_R']
-        lcl_r = chart_data['LCL_R']
-        
+    def spc_insight(
+        subgroup_means: List[float],
+        subgroup_ranges: Optional[List[float]] = None,
+        subgroup_stds: Optional[List[float]] = None,
+        chart_data: Optional[Dict[str, float]] = None
+    ) -> AnalysisInsight:
+        """SPC控制图分析洞察（支持 X-R, X-S）"""
         highlights = []
         recommendations = []
+        stability = "Unknown"
         
-        # 检查X-bar图是否受控
-        x_outliers = sum(1 for x in subgroup_means if x > ucl_x or x < lcl_x)
-        r_outliers = sum(1 for r in subgroup_ranges if r > ucl_r)
+        # Determine chart type
+        chart_type = chart_data.get('chart_type') if chart_data else None
         
-        if x_outliers == 0 and r_outliers == 0:
-            highlights.append("✅ Process in statistical control")
-            stability = "In control"
-        else:
-            highlights.append(f"⚠️  Process out of control: {x_outliers} X-bar outliers, {r_outliers} R chart outliers")
-            recommendations.append("Investigate special causes and identify out-of-control points")
-            stability = "Out of control"
-        
-        # 控制限宽度评估
-        process_width = ucl_x - lcl_x
-        if process_width > 0:
+        if chart_type in ('X-R', 'x-r'):
+            # X-R chart
+            x_bar = chart_data['X_bar']
+            r_bar = chart_data['R_bar']
+            ucl_x = chart_data['UCL_X']
+            lcl_x = chart_data['LCL_X']
+            ucl_r = chart_data['UCL_R']
+            lcl_r = chart_data['LCL_R']
+            
+            # Check X-bar and R charts
+            x_outliers = sum(1 for x in subgroup_means if x > ucl_x or x < lcl_x)
+            r_outliers = sum(1 for r in (subgroup_ranges or []) if r > ucl_r)
+            
+            if x_outliers == 0 and r_outliers == 0:
+                highlights.append("✅ Process in statistical control")
+                stability = "In control"
+            else:
+                highlights.append(f"⚠️  Process out of control: {x_outliers} X-bar outliers, {r_outliers} R chart outliers")
+                recommendations.append("Investigate special causes and identify out-of-control points")
+                stability = "Out of control"
+            
             cv_process = (r_bar / x_bar) * 100 if x_bar != 0 else 0
             highlights.append(f"Process Variation Coefficient: {cv_process:.1f}%")
-        
-        summary = f"SPC control chart analysis completed. X̄={x_bar:.4f}, R̄={r_bar:.4f}. Control limits: X̄ [{lcl_x:.4f}, {ucl_x:.4f}], R [{lcl_r:.4f}, {ucl_r:.4f}]."
+            
+            summary = f"SPC control chart analysis completed. X̄={x_bar:.4f}, R̄={r_bar:.4f}. Control limits: X̄ [{lcl_x:.4f}, {ucl_x:.4f}], R [{lcl_r:.4f}, {ucl_r:.4f}]."
+            
+        elif chart_type in ('X-S', 'x-s'):
+            # X-S chart
+            x_bar = chart_data['X_bar']
+            s_bar = chart_data['S_bar']
+            ucl_x = chart_data['UCL_X']
+            lcl_x = chart_data['LCL_X']
+            ucl_s = chart_data['UCL_S']
+            lcl_s = chart_data['LCL_S']
+            
+            x_outliers = sum(1 for x in subgroup_means if x > ucl_x or x < lcl_x)
+            s_outliers = sum(1 for s in (subgroup_stds or []) if s > ucl_s)
+            
+            if x_outliers == 0 and s_outliers == 0:
+                highlights.append("✅ Process in statistical control")
+                stability = "In control"
+            else:
+                highlights.append(f"⚠️  Process out of control: {x_outliers} X-bar outliers, {s_outliers} S chart outliers")
+                recommendations.append("Investigate special causes and identify out-of-control points")
+                stability = "Out of control"
+            
+            cv_process = (s_bar / x_bar) * 100 if x_bar != 0 else 0
+            highlights.append(f"Process Variation Coefficient: {cv_process:.1f}% (based on S)")
+            
+            summary = f"SPC control chart analysis completed. X̄={x_bar:.4f}, S̄={s_bar:.4f}. Control limits: X̄ [{lcl_x:.4f}, {ucl_x:.4f}], S [{lcl_s:.4f}, {ucl_s:.4f}]."
+            
+        elif chart_type in ('np', 'p'):
+            # For now, simply use generic
+            summary = "SPC control chart analysis completed."
+            highlights.append("Analysis complete. Review chart for out-of-control points.")
+            stability = "Review required"
+        else:
+            summary = "SPC analysis completed."
+            highlights.append("No specific insight generator for this chart type.")
+            stability = "Unknown"
         
         return AnalysisInsight(
             summary=summary,

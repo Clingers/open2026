@@ -1,0 +1,348 @@
+/**
+ * Industrial Quality Statistics - Theme Upgrade Variables
+ *
+ * 扩展内容:
+ * - 暗色模式 (Dark Mode) 完整变量系统
+ * - ECharts 图表配色方案
+ * - 高级动画与过渡效果
+ *
+ * 使用方法: 在 industrial-theme.css 之后引入
+ * 或者在 <html> 标签上添加 data-theme="dark" 启用暗色模式
+ */
+
+/* ============================================
+   1. 暗色模式变量 (Dark Mode Palette)
+   ============================================ */
+[data-theme="dark"] {
+  /* === 主色调 (加深以适配暗背景) === */
+  --primary: #4080ff;
+  --primary-hover: #5790ff;
+  --primary-light: #1a3a6e;
+
+  /* === 语义色 (高对比度) === */
+  --success: #36d37a;
+  --success-light: #0f4c2e;
+  --warning: #ffb020;
+  --warning-light: #66400f;
+  --danger: #ff4d4f;
+  --danger-light: #6b1e1f;
+  --info: #2d8cf0;
+  --info-light: #1a4d7a;
+
+  /* === 中性灰阶 (反转明暗) === */
+  --gray-50: #1a1d23;   /* 最亮背景 */
+  --gray-100: #22262e;  /* 卡片/分组 */
+  --gray-200: #2a2f3a;  /* 边框/分割线 */
+  --gray-300: #3a424d;
+  --gray-400: #5a6675;
+  --gray-500: #7a8595;
+  --gray-600: #9aa4b5;
+  --gray-700: #bdc4cf;
+  --gray-800: #dde1e6;
+  --gray-900: #f0f2f5;   /* 主要文字 */
+
+  /* === 背景色 === */
+  --bg-body: #0f1216;
+  --bg-card: #1a1d23;
+  --bg-sidebar: #16191d;
+  --bg-surface: #22262e;
+
+  /* === 阴影 (暗色模式柔和化) === */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================
+   2. ECharts 图表配色方案
+   ============================================ */
+
+/* 工业蓝主题调色板 (10类色阶) */
+:root {
+  /* UI 辅助变量 (Tab / Loading) */
+  --border-color: var(--gray-200);
+  --text-secondary: var(--gray-600);
+
+  --echarts-industrial-blue-1: #0052cc;
+  --echarts-industrial-blue-2: #0747a6;
+  --echarts-industrial-blue-3: #0e5cda;
+  --echarts-industrial-blue-4: #146ce4;
+  --echarts-industrial-blue-5: #2684ff;
+  --echarts-industrial-blue-6: #4d9aff;
+  --echarts-industrial-blue-7: #80b3ff;
+  --echarts-industrial-blue-8: #b3d4ff;
+  --echarts-industrial-blue-9: #e6effc;
+  --echarts-industrial-blue-10: #f5f9ff;
+
+  /* 语义色扩展 (图表用) */
+  --echarts-success: #00a854;
+  --echarts-warning: #ffab00;
+  --echarts-danger: #ff4d4f;
+  --echarts-info: #1890ff;
+
+  /* 中性灰 (图表文本/轴线) */
+  --echarts-text: #4b5563;
+  --echarts-axis: #9ca3af;
+  --echarts-grid: #e5e7eb;
+
+  /* 渐变色 (面积图/热力图) */
+  --echarts-gradient-start: rgba(0, 82, 204, 0.8);
+  --echarts-gradient-end: rgba(0, 82, 204, 0.1);
+}
+
+/* 暗色模式下的 ECharts 配色 */
+[data-theme="dark"] {
+  --echarts-industrial-blue-1: #4080ff;
+  --echarts-industrial-blue-2: #5790ff;
+  --echarts-industrial-blue-3: #6a9fff;
+  --echarts-industrial-blue-4: #80b3ff;
+  --echarts-industrial-blue-5: #95cbff;
+  --echarts-industrial-blue-6: #b3d4ff;
+  --echarts-industrial-blue-7: #cfe5ff;
+  --echarts-industrial-blue-8: #e6f0ff;
+  --echarts-industrial-blue-9: #f0f7ff;
+  --echarts-industrial-blue-10: #f8fcff;
+
+  --echarts-text: #bdc4cf;
+  --echarts-axis: #5a6675;
+  --echarts-grid: #3a424d;
+
+  --echarts-gradient-start: rgba(64, 128, 255, 0.9);
+  --echarts-gradient-end: rgba(64, 128, 255, 0.2);
+}
+
+/* ============================================
+   3. 高级过渡效果
+   ============================================ */
+:root {
+  --transition-micro: 100ms ease;
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 350ms ease;
+  --transition-theme: 500ms ease; /* 主题切换专用 */
+}
+
+/* 平滑主题切换 */
+html {
+  transition: background-color var(--transition-theme), color var(--transition-theme);
+}
+* {
+  transition: background-color var(--transition-theme), border-color var(--transition-theme), color var(--transition-theme);
+}
+.card,
+.btn,
+.nav-item,
+.column-tag {
+  transition: all var(--transition-base);
+}
+
+/* ============================================
+   4. 骨架屏 (Skeleton Loading)
+   ============================================ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--gray-200) 0%,
+    var(--gray-100) 50%,
+    var(--gray-200) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite linear;
+  border-radius: var(--radius-md);
+}
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--gray-300) 0%,
+    var(--gray-200) 50%,
+    var(--gray-300) 100%
+  );
+  background-size: 200% 100%;
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 骨架屏组件变体 */
+.skeleton-text {
+  height: 1em;
+  margin-bottom: 0.5em;
+}
+.skeleton-circle {
+  border-radius: 50%;
+}
+.skeleton-card {
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+.skeleton-chart {
+  height: 300px;
+}
+
+/* ============================================
+   5. 图表容器增强
+   ============================================ */
+.chart-container {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  background: var(--bg-surface);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  transition: border-color var(--transition-fast);
+}
+.chart-container:hover {
+  border-color: var(--primary);
+}
+[data-theme="dark"] .chart-container {
+  border-color: var(--gray-300);
+}
+
+.chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: var(--space-md);
+}
+[data-theme="dark"] .chart-title {
+  color: var(--gray-900);
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+  justify-content: center;
+}
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+.chart-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* ============================================
+   6. 结果页 Tab 化 & 加载状态
+   ============================================ */
+.result-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+}
+
+.result-tab {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+}
+
+.result-tab:hover {
+  color: var(--echarts-industrial-blue-1);
+  background: rgba(0, 82, 204, 0.05);
+}
+
+[data-theme="dark"] .result-tab:hover {
+  background: rgba(0, 82, 204, 0.15);
+}
+
+.result-tab.active {
+  color: var(--echarts-industrial-blue-1);
+  border-bottom-color: var(--echarts-industrial-blue-1);
+}
+
+.result-panel {
+  display: none;
+}
+
+.result-panel.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 加载状态 Overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 8px;
+}
+
+[data-theme="dark"] .loading-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--echarts-industrial-blue-1);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   银灰极简 + 玻璃拟态变量追加 (轻微模糊，现代化纤细)
+   ============================================ */
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.25);
+  --glass-blur: 8px;
+  --accent-gradient: linear-gradient(135deg, #4D94FF 0%, #00D4FF 100%);
+  --accent-color: #4D94FF;
+  --accent-hover: #3D8AE8;
+}
+
+[data-theme="dark"] {
+  --glass-bg: rgba(26, 26, 26, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --accent-color: #5A9CFF;
+  --accent-hover: #6BA7FF;
+}
+
+/* 玻璃拟态组件覆盖 */
+.card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border) !important;
+}
+
+/* 按钮渐变呼应 */
+.btn-primary {
+  background: var(--accent-gradient);
+  border: none;
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+}

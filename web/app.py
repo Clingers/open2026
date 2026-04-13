@@ -257,35 +257,140 @@ def handle_assess(data, filepath, output_dir, session_id):
 
 
 def handle_spc(data, filepath, output_dir, session_id):
-    """SPC控制图"""
+    """SPC控制图（支持 X-R, X-S, p, np）"""
+    from core.spc import SPCControlChart
+    
     column = data.get('column')
     subgroup_size = data.get('subgroup_size', DEFAULT_SUBGROUP_SIZE)
+    chart_type = data.get('spc_type', 'x-r')  # 从 spc_type 获取具体图类型
     
     df = load_dataframe(filepath)
     if column not in df.columns:
         raise ValueError(f"列 '{column}' 不存在")
     
-    # 调用 CLI 生成图片
-    env = os.environ.copy()
-    env['PYTHONPATH'] = PROJECT_ROOT
-    cmd = [
-        sys.executable, '-m', 'cli.main',
-        'spc',
-        '--file', filepath,
-        '--column', column,
-        '--subgroup-size', str(subgroup_size),
-        '--output-dir', output_dir
-    ]
-    result = run_subprocess_command(cmd, env, PROJECT_ROOT)
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr)
+    # 准备子组数据（所有 SPC 图都需要子组结构）
+    data_series = get_column_data(df, column)
+    
+    # 构建子组: [[val1_sub1, val2_sub1, ...], [val1_sub2, ...], ...]
+    # 简单按顺序分组，若用户未提供子组信息，默认连续分组
+    n = subgroup_size
+    subgroups = [data_series[i:i+n] for i in range(0, len(data_series), n)]
+    subgroups = [g for g in subgroups if len(g) == n]  # 丢弃不完整的最后子组
+    
+    if len(subgroups) < 2:
+        raise ValueError("数据点不足，至少需要 2 个子组才能生成控制图")
+    
+    # 根据类型生成控制图
+    chart_data = None
+    plot_func = None
+    
+    if chart_type == 'x-r':
+        chart_data = SPCControlChart.x_r_chart(subgroups)
+        plot_func = SPCControlChart.plot_x_r
+    elif chart_type == 'x-s':
+        chart_data = SPCControlChart.x_s_chart(subgroups)
+        plot_func = SPCControlChart.plot_x_s
+    elif chart_type == 'p':
+        # p 图需要二项数据，这里借用现有逻辑（从 CLI 调用）
+        # 为保证一致性，p 图仍走 CLI（数据格式不同）
+        env = os.environ.copy()
+        env['PYTHONPATH'] = PROJECT_ROOT
+        cmd = [
+            sys.executable, '-m', 'cli.main',
+            'spc',
+            '--file', filepath,
+            '--column', column,
+            '--subgroup-size', str(subgroup_size),
+            '--output-dir', output_dir
+        ]
+        result = run_subprocess_command(cmd, env, PROJECT_ROOT)
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr)
+        files = collect_output_files(output_dir, ['.png'])
+        spc_params = calculate_spc_parameters(data_series, subgroup_size)
+        insight_text = generate_spc_insight(spc_params)
+        return {
+            'success': True,
+            'session': session_id,
+            'files': files,
+            'text': insight_text,
+            'message': 'p 控制图生成完成'
+        }
+    elif chart_type == 'np':
+        # np 图同样需要 (缺陷数, n) 对，这里简化：用户需提供缺陷数列
+        # 暂时无法从单一数值列推导，仍需 CLI 支持
+        # 为快速推进，np 也暂时走 CLI（后续可重构）
+        env = os.environ.copy()
+        env['PYTHONPATH'] = PROJECT_ROOT
+        cmd = [
+            sys.executable, '-m', 'cli.main',
+            'spc',
+            '--file', filepath,
+            '--column', column,
+            '--subgroup-size', str(subgroup_size),
+            '--output-dir', output_dir
+        ]
+        result = run_subprocess_command(cmd, env, PROJECT_ROOT)
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr)
+        files = collect_output_files(output_dir, ['.png'])
+        spc_params = calculate_spc_parameters(data_series, subgroup_size)
+        insight_text = generate_spc_insight(spc_params)
+        return {
+            'success': True,
+            'session': session_id,
+            'files': files,
+            'text': insight_text,
+            'message': 'np 控制图生成完成'
+        }
+    else:
+        raise ValueError(f"不支持的 SPC 类型: {chart_type}")
+    
+    # 使用 matplotlib 直接绘制（X-R, X-S）
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    
+    fig = plot_func(chart_data)
+    output_path = os.path.join(output_dir, f'spc_{chart_type}_{column}.png')
+    fig.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close(fig)
     
     # 收集文件
     files = collect_output_files(output_dir, ['.png'])
     
-    # 生成洞察
-    data_list = get_column_data(df, column)
-    spc_params = calculate_spc_parameters(data_list, subgroup_size)
+    # 生成洞察 (参数映射到 InsightGenerator 接口)
+    spc_params = {
+        'chart_type': chart_data['chart_type'],
+        'subgroup_size': chart_data['subgroup_size']
+    }
+    # 映射 X-R 和 X-S 的 X 图参数
+    if 'X_bar' in chart_data:
+        spc_params['X_bar'] = chart_data['X_bar']
+        spc_params['R_bar'] = chart_data.get('R_bar')
+        spc_params['UCL_X'] = chart_data['UCL_X']
+        spc_params['LCL_X'] = chart_data['LCL_X']
+        spc_params['UCL_R'] = chart_data.get('UCL_R')
+        spc_params['LCL_R'] = chart_data.get('LCL_R')
+    if 'X_bar_bar' in chart_data:
+        spc_params['X_bar'] = chart_data['X_bar_bar']
+        spc_params['S_bar'] = chart_data.get('S_bar')
+        spc_params['UCL_X'] = chart_data['UCL_X']
+        spc_params['LCL_X'] = chart_data['LCL_X']
+        spc_params['UCL_S'] = chart_data.get('UCL_S')
+        spc_params['LCL_S'] = chart_data.get('LCL_S')
+    # np 图
+    if 'np_bar' in chart_data:
+        spc_params['np_bar'] = chart_data['np_bar']
+        spc_params['UCL'] = chart_data['UCL']
+        spc_params['LCL'] = chart_data['LCL']
+    # 补充子组数据用于异常点检测
+    if 'x_bars' in chart_data:
+        spc_params['subgroup_means'] = chart_data['x_bars']
+    if 'ranges' in chart_data:
+        spc_params['subgroup_ranges'] = chart_data['ranges']
+    if 'stds' in chart_data:
+        spc_params['subgroup_stds'] = chart_data['stds']
     insight_text = generate_spc_insight(spc_params)
     
     return {
@@ -293,7 +398,7 @@ def handle_spc(data, filepath, output_dir, session_id):
         'session': session_id,
         'files': files,
         'text': insight_text,
-        'message': 'SPC控制图生成完成'
+        'message': f'{chart_type} 控制图生成完成'
     }
 
 

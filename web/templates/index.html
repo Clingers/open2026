@@ -337,6 +337,17 @@
                     <input type="number" class="form-control" id="subgroup-size" value="5" min="2" max="20">
                 </div>
                 
+                <!-- SPC Chart Type -->
+                <div class="mb-3" id="spc-chart-type-group" style="display: none;">
+                    <label class="form-label">SPC 图类型:</label>
+                    <select class="form-select" id="spc-chart-type">
+                        <option value="x-r">📈 X-R 控制图 (均值-极差)</option>
+                        <option value="x-s">📉 X-S 控制图 (均值-标准差)</option>
+                        <option value="p">📊 p 控制图 (不合格率)</option>
+                        <option value="np">🔢 np 控制图 (不合格品数)</option>
+                    </select>
+                </div>
+                
                 <!-- Chart Type (Assess) -->
                 <div class="mb-3" id="chart-type-group" style="display: none;">
                     <label class="form-label">评估图类型:</label>
@@ -604,6 +615,7 @@
             
             // Hide all conditional options
             document.getElementById('subgroup-size-group').style.display = 'none';
+            document.getElementById('spc-chart-type-group').style.display = 'none';
             document.getElementById('chart-type-group').style.display = 'none';
             document.getElementById('regression-inputs').style.display = 'none';
             document.getElementById('spec-limits-group').style.display = 'none';
@@ -611,6 +623,7 @@
             // Show relevant options
             if (type === 'spc') {
                 document.getElementById('subgroup-size-group').style.display = 'block';
+                document.getElementById('spc-chart-type-group').style.display = 'block';
             } else if (type === 'assess') {
                 document.getElementById('chart-type-group').style.display = 'block';
             } else if (type === 'regression') {
@@ -626,16 +639,23 @@
                 return;
             }
             
+            const analysisType = document.getElementById('analysis-type').value;
             const data = {
                 filename: currentFilename,
                 column: selectedColumn,
-                type: document.getElementById('analysis-type').value
+                type: analysisType // 大类: spc/stats/assess/...
             };
             
             // Add optional parameters
             const chartType = document.getElementById('chart-type');
             if (chartType && chartType.value) {
                 data.chart_type = chartType.value;
+            }
+            
+            // SPC: 使用 spc-chart-type 决定具体图类型，放入 spc_type
+            const spcChartType = document.getElementById('spc-chart-type');
+            if (analysisType === 'spc' && spcChartType && spcChartType.value) {
+                data.spc_type = spcChartType.value; // x-r, x-s, p, np
             }
             
             const xInput = document.getElementById('regression-x');
@@ -798,7 +818,7 @@
                 document.getElementById('results').style.display = 'block';
                 document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
             }, 100);
-        }}
+        }
         
 
         // Tab 切换逻辑
