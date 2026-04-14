@@ -16,7 +16,7 @@ matplotlib.use('Agg')
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 导入工具函数
-from .utils import (
+from utils import (
     standardize_error_response,
     run_subprocess_command,
     collect_output_files,
@@ -69,11 +69,29 @@ def upload_file():
     
     try:
         df = load_dataframe(filepath)
+        
+        # 准备数据预览（前10行）
+        preview_data = []
+        for i in range(min(10, len(df))):
+            row = {}
+            for col in df.columns:
+                value = df.iloc[i][col]
+                # 处理NaN值
+                if pd.isna(value):
+                    row[col] = ""
+                elif isinstance(value, (int, float)):
+                    row[col] = float(value) if not pd.isna(value) else ""
+                else:
+                    row[col] = str(value)
+            preview_data.append(row)
+        
         return jsonify({
             'success': True,
             'filename': file.filename,
             'columns': df.columns.tolist(),
-            'rows': len(df)
+            'rows': len(df),
+            'preview': preview_data,
+            'total_columns': len(df.columns)
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
