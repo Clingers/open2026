@@ -1,0 +1,44 @@
+@charset 'UTF-8';
+
+/* 色彩系统 */
+:root {
+  --primary: #00e5ff; /* 科技青
+  --primary-hover: #0747a6;
+  --success: #00ff88; /* 霓绿
+  --warning: #ffeb3b;
+  --danger: #ff5252;
+  --chart-gradient: linear-gradient(90deg, #00e5ff 0%, #7b61ff 100%);
+}
+
+/* 主要组件样式 */
+.card {
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.01);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 133, 255, 0.2);
+}
+
+.btn-primary:hover {
+  background: #00c8ff;
+}
+
+p, button, input, select {
+  font-family: var(--font-sans);
+}
+
+/* 调试目的显示卡片边缘 */
+.card-border {
+  border: 1px solid var(--primary);
+}
